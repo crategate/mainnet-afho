@@ -1,0 +1,2290 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Components — wallet, stake form, positions, stats, explainer,
+   split chart, built-with, wallet-adapter overrides. Geometry, color
+   and fallback backgrounds live here; effect layers (::before /
+   ::after glitches) live in fx-*.css; the tinted-glass treatment is
+   opt-in via the .glass-pane class in glass.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Wallet Dashboard ─── */
+.wallet-dashboard {
+    max-width: 100%;
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    position: relative;
+    isolation: isolate;
+    /* Keep the header's stacking context (and the wallet-adapter
+       dropdown inside it) above the sibling glass panes, which are
+       later in the DOM and would otherwise paint over the open
+       dropdown. */
+    z-index: 2;
+}
+
+.wallet-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--neon-green);
+    font-weight: 400;
+    font-family: var(--font-mono);
+}
+
+/* Right-hand cluster: the "Connected" label and the wallet button sit
+   together as one unit, pushed to the header's right edge. */
+.dashboard-wallet-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+/* The Activity row inside the AFHO wallet dropdown (AfhoWalletButton): the
+   router Link must dress exactly like its sibling list items. */
+.wallet-adapter-dropdown-list .wallet-adapter-dropdown-list-item a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Left-hand link to the activity page — quiet mono pill in the header's
+   visual language. */
+.recent-activity-link {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    text-decoration: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 0.45rem 0.7rem;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.recent-activity-link:hover,
+.recent-activity-link:focus-visible {
+    color: var(--neon-cyan);
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+/* ─── Connect Wallet Tile ─── */
+.connect-prompt {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    position: relative;
+    isolation: isolate;
+}
+
+.connect-prompt .glitch-border {
+    position: absolute;
+    inset: -1px;
+    border-radius: calc(var(--radius-lg) + 1px);
+    pointer-events: none;
+    animation: neonFlickerSlow calc(var(--fx-border-cycle) * 1.75) infinite;
+    animation-delay: var(--glitch-delay, 0s);
+    border: 1px solid transparent;
+    z-index: 2;
+}
+
+.app-shell[data-connected='true'] .connect-prompt .glitch-border {
+    animation-duration: calc(var(--fx-border-cycle) * 1.3);
+}
+
+.connect-prompt h2 {
+    color: var(--text-primary);
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.connect-prompt p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+/* ─── Stake Form ───
+   --fx-step climbs as the staking steps complete (data-step), so
+   the rainbow, border and text effects grow slightly more excited
+   while typing and once a valid amount is ready. */
+
+.stake-form {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transition: border-color 0.6s ease;
+    display: flex;
+    flex-direction: column;
+    --fx-step: 1;
+}
+
+.stake-form[data-step='typing'] {
+    --fx-step: 1.3;
+}
+
+.stake-form[data-step='ready'] {
+    --fx-step: 1.55;
+}
+
+.stake-form:hover {
+    border-color: rgba(0, 240, 255, 0.25);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.08);
+}
+
+.stake-form h3 {
+    color: var(--text-primary);
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.stake-form .balance-line {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+    font-family: var(--font-mono);
+}
+
+.stake-form .balance-line span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.stake-form input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: var(--font-mono);
+    margin-bottom: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.stake-form input:focus {
+    outline: none;
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
+}
+
+/* Amount glow: activates with the first typed digit and brightens/widens as
+   the amount climbs. --stake-glow is 0–1, log-scaled by StakeForm against
+   the 9,006,000 position cap. */
+.stake-form input.filled {
+    border-color: rgba(0, 240, 255, calc(0.35 + 0.45 * var(--stake-glow)));
+    box-shadow: 0 0 calc(5px + 15px * var(--stake-glow)) rgba(0, 240, 255, calc(0.14 + 0.36 * var(--stake-glow)));
+}
+
+.stake-form input.filled:focus {
+    box-shadow:
+        0 0 0 3px rgba(0, 240, 255, 0.1),
+        0 0 calc(8px + 15px * var(--stake-glow)) rgba(0, 240, 255, calc(0.16 + 0.34 * var(--stake-glow)));
+}
+
+.stake-form input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Quick-fill percent buttons (25 / 50 / 75 / MAX) under the amount input —
+   mirrors the offer desk's .pct-btn look. */
+.stake-form .pct-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -0.5rem 0 1rem;
+}
+
+.stake-form .pct-btn {
+    width: auto;
+    padding: 5px 11px;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+    background: none;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+}
+
+.stake-form .pct-btn:hover:not(:disabled) {
+    background: transparent;
+    color: var(--neon-cyan);
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.stake-form .pct-btn:active:not(:disabled) {
+    background: transparent;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.stake-form .pct-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+    border-color: var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+/* The ready-state submit glow must not reach the quick-fill buttons. */
+.stake-form[data-step='ready'] .pct-btn:not(:disabled) {
+    animation: none;
+    border-color: var(--border-subtle);
+}
+
+/* Submit button — scoped to .stake-submit so bare <button>s inside the tile
+   (the mint copy affordance) keep their own quiet styling. */
+.stake-form .stake-submit {
+    width: 100%;
+    padding: 0.875rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--neon-cyan);
+    background: transparent;
+    color: var(--neon-cyan);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 1.2s;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stake-form .stake-submit:hover:not(:disabled) {
+    background: rgba(0, 240, 255, 0.1);
+    box-shadow: 1px 0 20px rgba(0, 240, 255, 0.7);
+}
+
+.stake-form .stake-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: var(--text-muted);
+    color: var(--text-muted);
+}
+
+/* Stake ladder: once an amount is typed, the submit button glows calmly */
+.stake-form[data-step='ready'] .stake-submit:not(:disabled) {
+    border-color: rgba(0, 240, 255, 0.6);
+    animation: pillGlow 3.4s ease-in-out infinite;
+}
+
+.custodial-note {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0 0 1rem;
+    line-height: 1.5;
+}
+
+/* Bright amber penalty warning — appears only once an amount is typed.
+   Always mounted so the height animates in and out (flex + max-height,
+   ceiling comfortably above the tallest note) instead of popping. The
+   paragraph inside is never clipped: the wrapper grows past its content. */
+.stake-note-reveal {
+    display: flex;
+    flex-direction: column;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.32s ease-out, opacity 0.25s ease;
+}
+
+.stake-note-reveal.open {
+    max-height: 11rem;
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .stake-note-reveal {
+        transition: none;
+    }
+}
+
+.stake-penalty-note {
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--neon-amber);
+    background: rgba(255, 170, 0, 0.1);
+    border: 1px solid rgba(255, 170, 0, 0.6);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.8rem;
+    margin: 0 0 1rem;
+    box-shadow: 0 0 16px rgba(255, 170, 0, 0.15);
+}
+
+/* Mint address: deliberately quiet — two lines of small light mono, no
+   pill/border, minimal height. The copy icon is the only affordance. */
+.mint-display {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+    opacity: 0.85;
+}
+
+.mint-display code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    color: var(--text-muted);
+}
+
+/* Click-to-copy address affordance — icon appears on hover/focus, and the
+   check state stays visible briefly after a successful copy. */
+.copy-address {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    text-align: inherit;
+}
+
+.copy-address-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--neon-cyan);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.copy-address:hover .copy-address-icon,
+.copy-address:focus-visible .copy-address-icon,
+.copy-address.copied .copy-address-icon {
+    opacity: 1;
+}
+
+.copy-address:focus-visible {
+    outline: 1px dashed var(--border-neon);
+    outline-offset: 2px;
+}
+
+/* Staking tile mint: keep the compact code look, reveal the copy icon. */
+.mint-copy {
+    color: var(--text-secondary);
+}
+
+.mint-copy:hover {
+    color: var(--text-primary);
+}
+
+/* ─── Positions ─── */
+.positions-shell {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    border: 1px solid var(--border-subtle);
+    position: relative;
+}
+
+.positions-shell h3 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.positions-list {
+    margin-top: 0;
+}
+
+.pos-contain {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 0.5rem;
+    border: 1px solid rgba(211, 0, 249, 0.28);
+    border-radius: 14px;
+    box-shadow:
+        0 0 16px rgba(211, 0, 249, 0.10),
+        inset 0 0 22px rgba(211, 0, 249, 0.05);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(211, 0, 249, 0.45) transparent;
+}
+.pos-contain::-webkit-scrollbar {
+    width: 6px;
+}
+.pos-contain::-webkit-scrollbar-track {
+    background: transparent;
+}
+.pos-contain::-webkit-scrollbar-thumb {
+    background: rgba(211, 0, 249, 0.45);
+    border-radius: 999px;
+}
+.pos-contain::-webkit-scrollbar-thumb:hover {
+    background: rgba(211, 0, 249, 0.65);
+}
+
+/* Claims header - control bar */
+.claims-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+    position: relative;
+    isolation: isolate;
+}
+
+.claim-collect,
+.exit-all-button {
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--neon-cyan);
+    background: transparent;
+    color: var(--neon-cyan);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.4s;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.claim-collect:hover:not(:disabled),
+.exit-all-button:hover:not(:disabled) {
+    background: rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.claim-collect:disabled,
+.exit-all-button:disabled {
+    opacity: 0.5;
+    color: #fff;
+    cursor: not-allowed;
+    border-color: red;
+}
+
+.exit-all-button {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+    animation: redPulse 3s ease-in-out infinite;
+}
+
+.exit-all-button:hover:not(:disabled) {
+    background: rgba(255, 42, 109, 0.1);
+    animation: redPulseFast 1.2s ease-in-out infinite;
+}
+
+/* ── Exit-all confirmation modal ──
+   Makes the cost explicit (stacked multipliers reset, exit penalties)
+   before the destructive loop signs anything. */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 10, 0.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 90;
+    padding: 1rem;
+}
+
+.exit-all-confirm {
+    max-width: 440px;
+    width: 100%;
+    padding: 1.25rem 1.4rem;
+    border: 1px solid var(--neon-pink);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.exit-all-confirm h3 {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--neon-pink);
+}
+
+.exit-all-confirm p {
+    margin: 0.45rem 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.exit-all-confirm p strong {
+    color: var(--neon-pink);
+    font-weight: 600;
+}
+
+.exit-all-confirm-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+.exit-all-confirm-actions button {
+    padding: 0.55rem 1rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.exit-all-cancel {
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.exit-all-cancel:hover:not(:disabled) {
+    background: rgba(0, 240, 255, 0.1);
+}
+
+.exit-all-confirm-button {
+    background: rgba(255, 42, 109, 0.12);
+    border: 1px solid var(--neon-pink);
+    color: var(--neon-pink);
+}
+
+.exit-all-confirm-button:hover:not(:disabled) {
+    background: rgba(255, 42, 109, 0.25);
+    box-shadow: 0 0 15px rgba(255, 42, 109, 0.25);
+}
+
+.exit-all-confirm-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Transaction result modal ──
+   Branded answer to every signed flow (replaces alert()). Success leads
+   with the action headline plus explorer buttons wearing each explorer's
+   own mark; failure goes red and loud, refresh-first instruction included. */
+.tx-modal {
+    max-width: 460px;
+    width: 100%;
+    padding: 1.35rem 1.5rem 1.25rem;
+    border: 1px solid var(--neon-green);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.tx-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: var(--neon-green);
+}
+
+.tx-headline {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.tx-detail {
+    margin: 0.75rem 0 0;
+    padding: 0.6rem 0.75rem;
+    max-height: 7.5rem;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+}
+
+.tx-modal--error {
+    border-color: var(--neon-red);
+    background: linear-gradient(165deg, rgba(46, 8, 14, 0.97), rgba(24, 6, 10, 0.98));
+    animation: redPulse 3s ease-in-out infinite;
+}
+
+.tx-fail-title {
+    margin: 0 0 0.55rem;
+    font-size: 1.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.1;
+    color: var(--neon-red);
+    text-shadow: 0 0 22px rgba(255, 42, 42, 0.55);
+}
+
+.tx-modal--error .tx-detail {
+    color: #e9a0a0;
+    border-color: rgba(255, 42, 42, 0.3);
+}
+
+.tx-advice {
+    margin: 0.75rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.tx-sig {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.tx-sig-copy {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+}
+
+.tx-sig-copy:hover {
+    color: var(--text-primary);
+}
+
+.tx-explorers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.tx-explorer-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.95rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+
+.tx-explorer-button--solscan {
+    border: 1px solid rgba(0, 232, 181, 0.45);
+    color: #00e8b5;
+}
+
+.tx-explorer-button--solscan:hover {
+    background: rgba(0, 232, 181, 0.08);
+    box-shadow: 0 0 14px rgba(0, 232, 181, 0.2);
+}
+
+.tx-explorer-button--solana {
+    border: 1px solid rgba(220, 31, 255, 0.4);
+    color: #cf9bff;
+}
+
+.tx-explorer-button--solana:hover {
+    background: rgba(220, 31, 255, 0.08);
+    box-shadow: 0 0 14px rgba(220, 31, 255, 0.2);
+}
+
+.tx-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+}
+
+.tx-actions button {
+    padding: 0.55rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tx-dismiss {
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.tx-dismiss:hover {
+    background: rgba(0, 240, 255, 0.1);
+}
+
+.tx-modal--error .tx-dismiss {
+    border-color: var(--text-muted);
+    color: var(--text-secondary);
+}
+
+.tx-refresh {
+    background: rgba(255, 42, 42, 0.12);
+    border: 1px solid var(--neon-red);
+    color: var(--neon-red);
+}
+
+.tx-refresh:hover {
+    background: rgba(255, 42, 42, 0.25);
+    box-shadow: 0 0 15px rgba(255, 42, 42, 0.25);
+}
+
+/* ── Wallet mark on signature buttons ──
+   The connected wallet's own icon rides ONLY the big moments: buttons
+   that put a transaction in front of the wallet for signing (stake
+   submit, collect-all, the modal confirms; the desk buy button carries
+   its flex rule in AmmPage.css). Repeated per-card triggers stay clean
+   so the mark keeps meaning "your wallet signs here". */
+.wallet-mark {
+    flex-shrink: 0;
+    border-radius: 3px;
+    display: inline-block;
+    user-select: none;
+}
+
+.stake-form .stake-submit,
+.claim-collect,
+.exit-all-confirm .exit-all-confirm-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* ── AFHO wallet trigger (AfhoWalletButton) ──
+   The stock react-ui trigger (purple slab, 600 weight, 48px box) restated
+   in the site's vocabulary: elevated glass, violet key so the wallet
+   stays the one distinct control on a page, mono 400 at topbar height.
+   Scoped to the component's own wrapper so the theme travels with it. */
+.afho-wallet-dropdown .wallet-adapter-button-trigger {
+    height: 34px;
+    line-height: 1;
+    padding: 0 0.8rem;
+    gap: 0.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid rgba(211, 0, 249, 0.4);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.afho-wallet-dropdown .wallet-adapter-button-trigger:not([disabled]):hover,
+.afho-wallet-dropdown .wallet-adapter-button-trigger:not([disabled]):active {
+    background: rgba(211, 0, 249, 0.08);
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 14px rgba(211, 0, 249, 0.22);
+    color: var(--text-primary);
+}
+
+.grand-total {
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.grand-total strong {
+    color: var(--neon-green);
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+/* Locked-total header — centered sum of staked principal above the list */
+.locked-total-header {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.locked-total-label {
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.locked-total-balance {
+    margin-left: 0.5rem;
+    color: var(--neon-cyan);
+    font-size: 1.1rem;
+    font-weight: 400;
+    font-family: var(--font-mono);
+}
+
+/* ─── Position Cards ─── */
+.position-card {
+    margin-bottom: 1rem;
+    text-align: left;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    border: 1px solid var(--border-subtle);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    position: relative;
+    isolation: isolate;
+}
+
+/* Vesting / locked positions: slightly darker and amber-tinted so they
+   stand out from regular, liquid stakes. */
+.position-card.vesting {
+    background: linear-gradient(135deg, rgba(20, 18, 22, 0.95), rgba(30, 24, 16, 0.92));
+    border-color: rgba(255, 170, 0, 0.25);
+}
+
+.position-card.vesting:hover {
+    border-color: rgba(255, 170, 0, 0.5);
+    box-shadow: 0 0 18px rgba(255, 170, 0, 0.12);
+}
+
+.position-card:hover {
+    border-color: rgba(255, 42, 109, 0.4);
+    box-shadow: 0 0 15px rgba(255, 42, 109, 0.1);
+}
+
+.position-card .position-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.position-card strong {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.position-card span:not(.multiplier-badge) {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+}
+
+.multiplier-badge {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(211, 0, 249, 0.15));
+    color: var(--neon-cyan);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.position-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bond-badge {
+    background: linear-gradient(135deg, rgba(255, 170, 0, 0.15), rgba(255, 42, 109, 0.12));
+    color: var(--neon-amber);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    border: 1px solid rgba(255, 170, 0, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.vesting-countdown {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0.5rem 0 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 170, 0, 0.08);
+    border: 1px solid rgba(255, 170, 0, 0.2);
+    border-radius: var(--radius-sm);
+}
+
+.countdown-number {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--neon-amber);
+    font-family: var(--font-mono);
+    line-height: 1;
+}
+
+.countdown-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.position-card div {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.reward-line {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.penalty-warning {
+    color: #ff6b6b !important;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.posr-line {
+    color: var(--text-secondary) !important;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.position-card .unstake {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.625rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--neon-pink);
+    background: transparent;
+    color: var(--neon-pink);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    animation: redPulse 3s ease-in-out infinite;
+}
+
+.position-card .unstake:hover:not(:disabled) {
+    background: rgba(255, 42, 109, 0.1);
+    animation: redPulseFast 1.2s ease-in-out infinite;
+}
+
+.position-card .unstake:disabled {
+    opacity: 0.3;
+    border-color: var(--text-muted);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    animation: none;
+}
+
+.no-positions {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 2rem;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    border: 1px var(--border-subtle);
+    position: relative;
+}
+
+/* ─── Staking toolbar buttons ─── */
+.staking-toggle {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+}
+
+.staking-toggle:hover {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+/* ─── Stats Section ─── */
+.pool-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .pool-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 900px) {
+    .pool-stats {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.25rem 1rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    min-width: 120px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+}
+
+.stat:hover {
+    border-color: rgba(0, 240, 255, 0.3);
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 300;
+    color: var(--neon-cyan);
+    font-family: var(--font-mono);
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.pool-stats.loading {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
+}
+
+/* ─── Explainer Section ─── */
+.explainer-grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 47px;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+    .explainer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 900px) {
+    .explainer-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.explainer-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+    position: relative;
+}
+
+.explainer-card:hover {
+    border-color: rgba(0, 240, 255, 0.3);
+}
+
+.explainer-icon {
+    width: 40px;
+    height: 40px;
+    margin: auto;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+}
+
+.explainer-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.explainer-card h4 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.explainer-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ─── Split Chart ─── */
+.split-chart {
+    margin-top: 2.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    position: relative;
+}
+
+/* The house soyjack: seated bottom-left of the proceeds card, pointing at
+   the donut. Decorative (aria-hidden) — the joke doesn't need a screen
+   reader to land twice. Swap the SVG to change the bit, not the layout. */
+.soyjack-point {
+    position: absolute;
+    right: clamp(4px, 3vw, 28px);
+    bottom: 11px;
+    width: clamp(66px, 15vw, 132px);
+    pointer-events: none;
+    opacity: 0.95;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.55));
+}
+
+.soyjack-caption {
+    position: absolute;
+    left: clamp(4px, 3vw, 28px);
+    bottom: clamp(60px, 14vw, 128px);
+    transform: rotate(-4deg);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.split-title {
+    margin: 1rem 0 2.25rem;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--text-primary);
+}
+
+.split-donut {
+    --donut-rotation: 0deg;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.donut-svg {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    overflow: visible;
+}
+
+.donut-rotate {
+    transform-origin: 120px 120px;
+    transform: rotate(calc(-90deg + var(--donut-rotation)));
+    will-change: transform;
+}
+
+.donut-segment {
+    filter: drop-shadow(0 0 7px var(--seg-color));
+    animation: donutPop 21s ease-in-out infinite;
+    animation-delay: var(--seg-delay, 0s);
+    transform-origin: 120px 120px;
+    will-change: filter, stroke-width;
+}
+
+.donut-label {
+    transform: translate(var(--label-x), var(--label-y)) rotate(calc(90deg - var(--donut-rotation)));
+    transform-origin: 0 0;
+    pointer-events: none;
+}
+
+.donut-label-dot {
+    filter: drop-shadow(0 0 4px var(--seg-color));
+}
+
+.donut-label-text {
+    text-anchor: middle;
+    dominant-baseline: middle;
+    fill: var(--text-primary);
+    font-family: var(--font-mono);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+.donut-label-value {
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+
+h2,
+h3 {
+    font-weight: 400;
+}
+
+.donut-label-name {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    fill: var(--text-secondary);
+}
+
+.donut-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1rem;
+}
+
+.donut-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.donut-legend-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    box-shadow: 0 0 8px currentColor;
+}
+
+@keyframes donutPop {
+
+    0%,
+    91%,
+    100% {
+        filter: drop-shadow(0 0 7px var(--seg-color));
+        stroke-width: 34;
+    }
+
+    92% {
+        filter: drop-shadow(0 0 28px var(--seg-color)) brightness(1.7) saturate(1.4);
+        stroke-width: 41;
+    }
+
+    93%,
+    96% {
+        filter: drop-shadow(0 0 7px var(--seg-color));
+        stroke-width: 34;
+    }
+
+    97% {
+        filter: drop-shadow(0 0 34px var(--seg-color)) brightness(2) saturate(1.6);
+        stroke-width: 43;
+    }
+
+    98% {
+        filter: drop-shadow(0 0 9px var(--seg-color));
+        stroke-width: 34;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .split-donut {
+        --donut-rotation: 0deg;
+    }
+
+    .donut-rotate,
+    .donut-segment,
+    .donut-label {
+        animation: none !important;
+    }
+
+    .donut-segment {
+        filter: drop-shadow(0 0 7px var(--seg-color));
+    }
+
+    .donut-rotate {
+        transform: rotate(-90deg);
+    }
+
+    .donut-label {
+        transform: translate(var(--label-x), var(--label-y)) rotate(90deg);
+    }
+}
+
+/* ─── Built With Section ─── */
+/* Two-tier flex, NO wrapping anywhere (a wrap-line bug in the flex engine
+   double-counts an item and breaks the rows; direction flips are immune).
+   Tiles sit in fixed PAIRS; the pairs and the tiles inside them share
+   space with basis-0 grow:
+   <640px  — grid column, pairs column: four stacked
+   640px+  — pairs row: 2x2
+   1024px+ — grid row: four side by side */
+.built-with-grid {
+    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.built-with-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+    flex: 1 1 0;
+}
+
+@media (min-width: 640px) {
+    .built-with-pair {
+        flex-direction: row;
+    }
+
+    .built-with-pair .built-with-tile {
+        flex: 1 1 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    .built-with-grid {
+        flex-direction: row;
+    }
+}
+
+.built-with-tile {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    /* Identical tiles: every tile fills its grid cell and flex-centers the
+       logo, so the three lockups (different aspect ratios) always sit in
+       the same-size box, vertically centered — no per-logo margin hacks. The
+       live price ticker sits directly under each logo. */
+    height: 100%;
+    min-height: 150px;
+    min-width: 0; /* let tiles shrink to the responsive basis — the wordmark
+       lockups' intrinsic width otherwise floors min-width:auto and breaks
+       the 4-across/2x2 wraps */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+    transition: .5s;
+}
+
+.built-with-tile:hover {
+    border-color: rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.08);
+    flex-grow: 2;
+    transition: 1s;
+
+}
+
+.built-with-docs-link {
+    /* Stretched link: fills the whole tile, so anywhere on the tile goes to
+       the docs — while the ticker anchor stacks above it and keeps the
+       CoinMarketCap link on the numbers. */
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: var(--radius-md);
+}
+
+.built-with-docs-link:focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+}
+
+.built-with-logo {
+    /* Uniform logo rendering: every lockup gets the same 56px height and its
+       natural width (no per-logo width overrides), with contain letterboxing
+       if a tile ever gets narrower than the lockup. */
+    height: 56px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    filter: grayscale(0.15) brightness(1.05) drop-shadow(0 0 6px rgba(0, 240, 255, 0.15));
+    transition: filter 0.2s;
+}
+
+.built-with-tile:hover .built-with-logo {
+    filter: grayscale(0) brightness(1.15) drop-shadow(0 0 14px rgba(0, 240, 255, 0.4));
+}
+
+/* Sub-branding row under a tile's main lockup (the Solana tile's
+   "with Anchor" credit): small badge + label, both carrying the
+   framework's docs link. */
+.built-with-sub {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.built-with-sub:hover {
+    color: var(--neon-cyan);
+}
+
+.built-with-sub-logo {
+    height: 18px;
+    width: auto;
+    border-radius: 4px;
+    filter: grayscale(0.15) brightness(1.05);
+    transition: filter 0.2s;
+}
+
+.built-with-tile:hover .built-with-sub-logo {
+    filter: grayscale(0) brightness(1.15);
+}
+
+/* Mark + nameplate lockup (Helius): no public letters lockup exists, so
+   the brand mark rides beside its name set in the site's mono voice. */
+.built-with-nameplate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.built-with-logo--mark {
+    height: 46px;
+    border-radius: 8px;
+}
+
+.built-with-name {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+}
+
+/* ── Live price tickers under the logos ── */
+.built-with-ticker {
+    /* The whole row is one link to the CoinMarketCap page — underline it end
+       to end so the affordance is obvious. Stacks above the stretched docs
+       link that covers the rest of the tile. */
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.25;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+    transition: color 0.2s, text-decoration-color 0.2s;
+    border-radius: var(--radius-sm);
+}
+
+.built-with-ticker:hover {
+    color: var(--neon-cyan);
+    text-decoration-color: currentColor;
+}
+
+.built-with-ticker:focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 3px;
+}
+
+.built-with-ticker-symbol {
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.built-with-ticker-price {
+    color: var(--text-primary);
+}
+
+.built-with-ticker-arrow {
+    /* Triangle sits on the same baseline as the numbers but stays visually
+       smaller than the price. */
+    font-size: 0.55em;
+    line-height: 1;
+}
+
+.built-with-ticker-pct {
+    /* Smaller than the price, per spec: price → arrow → % */
+    font-size: 0.6rem;
+    font-weight: 600;
+}
+
+.built-with-ticker--up .built-with-ticker-arrow,
+.built-with-ticker--up .built-with-ticker-pct {
+    color: var(--neon-green);
+}
+
+.built-with-ticker--down .built-with-ticker-arrow,
+.built-with-ticker--down .built-with-ticker-pct {
+    color: var(--neon-red);
+}
+
+/* ─── Wallet Button Overrides ─── */
+.wallet-button-wrapper {
+    display: inline-block;
+    /* stacking context so the rainbow ring behind it stays under the
+       button — and a real z-index so the adapter's DROPDOWN, which paints
+       inside this context, always floats above the sections below */
+    position: relative;
+    isolation: isolate;
+    z-index: 60;
+    border-radius: var(--radius-sm);
+}
+
+.wallet-button-wrapper .wallet-adapter-button {
+    background: transparent !important;
+    color: var(--neon-cyan) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.8rem !important;
+    /* A few px of side padding so the summarized address and wallet logo
+       don't sit right against the border. */
+    padding: 0.5rem 0.55rem !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    cursor: pointer !important;
+    transition: all 1.2s !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.wallet-button-wrapper .wallet-adapter-button:hover {
+    animation: walletButtonGlitch 1.8s infinite !important;
+    background: rgba(0, 240, 255, 0.08) !important;
+}
+
+.wallet-button-wrapper .wallet-adapter-button-trigger {
+    background: transparent !important;
+}
+
+/* Modal styling */
+.wallet-adapter-modal-wrapper {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+}
+
+.wallet-adapter-modal-button {
+    background: var(--bg-elevated) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: var(--text-primary) !important;
+}
+
+.wallet-adapter-modal-button:hover {
+    border-color: var(--neon-cyan) !important;
+}
+
+/* ─── Wallet Adapter Modal ─── */
+.wallet-adapter-modal-container {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg) !important;
+    position: relative;
+    overflow: visible !important;
+}
+
+.wallet-adapter-modal-title {
+    color: var(--text-primary) !important;
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* ─── Connecting text ─── */
+.connecting-text {
+    color: var(--neon-cyan);
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    18%,
+    37%,
+    54%,
+    72%,
+    100% {
+        opacity: 1;
+    }
+
+    14% {
+        opacity: 0.45;
+    }
+
+    33% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+
+    68% {
+        opacity: 0.55;
+    }
+
+    89% {
+        opacity: 0.4;
+    }
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-elevated);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-cyan);
+}
+
+/* ─── Selection ─── */
+::selection {
+    background: rgba(0, 240, 255, 0.2);
+    color: var(--text-primary);
+}
+
+/* ─── Misc utilities ─── */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ─── Site Footer (social links) ─── */
+.site-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.5rem 2.5rem;
+    border-top: 1px solid var(--border-subtle);
+    margin-top: 1rem;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Jupiter chip: ecosystem credit sitting between the logo and the token
+   address. Purple-keyed to match the Solana Explorer treatment in the
+   tx result modal. */
+.footer-jupiter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.35rem 0 0;
+    padding: 0.42rem 0.95rem;
+    border: 1px solid rgba(220, 31, 255, 0.35);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+
+.footer-jupiter-chip:hover {
+    color: #cf9bff;
+    border-color: rgba(220, 31, 255, 0.6);
+    box-shadow: 0 0 14px rgba(220, 31, 255, 0.2);
+}
+
+.footer-jupiter-chip img {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.social-link svg {
+    width: 20px;
+    height: 20px;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+    color: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+    transform: translateY(-2px);
+}
+
+/* Muted footnote under the collect-all tile: rewards still gated by vesting
+   bond positions (shown as +X AFHO — becomes claimable at end of vesting). */
+.vesting-note {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    opacity: 0.85;
+}
+
+.site-footer-note {
+    margin: 0;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+.site-footer-note .site-footer-disclaimer {
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.site-footer-note .site-footer-disclaimer:hover {
+    color: var(--text-primary);
+}
+
+/* Full token address in the footer — same click-to-copy affordance as the
+   staking tile, but the whole address is shown so it can be verified. */
+.site-footer-address {
+    display: flex;
+    justify-content: center;
+    max-width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
+}
+
+.site-footer-address .copy-address {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    max-width: 100%;
+}
+
+.site-footer-address .copy-address-value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+
+.site-footer-address .copy-address:hover,
+.site-footer-address .copy-address:focus-visible {
+    color: var(--text-primary);
+}
+
+/* ── Full-width stall banner ──
+   Rendered by StaleDataBanner when the shared chain snapshot has had no
+   successful fetch for 10 minutes (RPC outage / rate-limit stretch). Fixed
+   above the nav (SiteNav z-index 20, menus 90); vanishes the moment the
+   snapshot recovers — no manual dismiss. */
+.stall-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.55rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--neon-amber);
+    background: rgba(22, 13, 0, 0.93);
+    border-bottom: 1px solid rgba(255, 170, 0, 0.45);
+    box-shadow: 0 0 18px rgba(255, 170, 0, 0.18);
+    backdrop-filter: blur(6px);
+}
+
+.stall-banner-refresh {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--neon-amber);
+    background: transparent;
+    border: 1px solid rgba(255, 170, 0, 0.55);
+    border-radius: var(--radius-sm, 4px);
+    padding: 0.25rem 0.7rem;
+    cursor: pointer;
+}
+
+.stall-banner-refresh:hover {
+    background: rgba(255, 170, 0, 0.12);
+}
+
+.stall-banner-refresh:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* ── Full-width spotlight banner ──
+   Rendered by SpotlightBanner on every page except the offer desk while
+   the alt sheet window is live (market suspended + today's fixed-terms
+   sheet with lots left). Deliberately loud where the stall banner is
+   cautionary: violet/magenta, sparse flicker-out (never a constant pulse
+   — house rule), links to the desk. Copy ships obfuscated in the
+   component; nothing readable to grep here either. */
+.spotlight-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 140;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.07em;
+    color: var(--neon-pink);
+    text-decoration: none;
+    /* Translucent tint (not a solid bar): the backdrop-filter below blurs
+       whatever scrolls under the banner, so it reads as frosted violet
+       glass over the page instead of a plank. */
+    background:
+        linear-gradient(90deg,
+            rgba(30, 0, 40, 0.55) 0%,
+            rgba(58, 0, 78, 0.55) 30%,
+            rgba(88, 0, 96, 0.55) 70%,
+            rgba(30, 0, 40, 0.55) 100%);
+    border-bottom: 1px solid rgba(255, 64, 200, 0.55);
+    box-shadow:
+        0 2px 22px rgba(255, 42, 109, 0.28),
+        0 0 42px rgba(170, 0, 255, 0.22);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    cursor: pointer;
+    animation: spotlightFlicker calc(var(--fx-border-cycle) * 7) infinite;
+}
+
+.spotlight-banner:hover {
+    color: #ffd6f5;
+    border-bottom-color: rgba(255, 64, 200, 0.85);
+}
+
+.spotlight-banner-copy em {
+    font-style: normal;
+    color: #ff9ce8;
+}
+
+.spotlight-banner-cta {
+    font-size: 0.9rem;
+    color: #ffb3f0;
+    text-shadow: 0 0 10px rgba(255, 64, 200, 0.7);
+}
+
+/* Intermittent flicker-OUT: mostly on, brief drops — the desk's lit
+   state uses the same grammar tuned gold (see AmmPage.css). */
+@keyframes spotlightFlicker {
+
+    0%,
+    38%,
+    41.5%,
+    82%,
+    100% {
+        opacity: 1;
+    }
+
+    39% {
+        opacity: 0.55;
+    }
+
+    39.8% {
+        opacity: 0.9;
+    }
+
+    40.4% {
+        opacity: 0.6;
+    }
+
+    84% {
+        opacity: 0.72;
+    }
+
+    84.6% {
+        opacity: 0.95;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spotlight-banner {
+        animation: none;
+    }
+}
+
+/* ── Freeze feature ── */
+.position-card.frozen {
+    border-color: rgba(120, 180, 255, 0.45);
+    box-shadow: 0 0 18px rgba(90, 150, 255, 0.18);
+
+    background: #d7f9fa2e;
+    text-shadow: 9px 7px 4px black;
+}
+
+/* Right-side column: pills on top, freeze action tucked under them. */
+.position-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 7px;
+}
+
+.freeze-button {
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(120, 180, 255, 0.45);
+    background: rgba(70, 120, 210, 0.16);
+    color: #cfe6ff;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: background 120ms ease, transform 120ms ease;
+}
+
+.freeze-button:hover:not(:disabled) {
+    background: rgba(70, 120, 210, 0.3);
+}
+
+.freeze-button:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.freeze-button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.freeze-countdown {
+    font-size: 0.8rem;
+    color: #a9c8ef;
+    margin: 4px 0 2px;
+}
+
+.freeze-ended-note {
+    font-size: 0.75rem;
+    color: #8fa3c0;
+    margin: 4px 0 2px;
+}
+
+.freeze-modal {
+    max-width: 440px;
+    width: min(92vw, 440px);
+}
+
+/* Perp-style duration slider: big readout above, endcaps flanking the track. */
+.freeze-readout {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    margin: 16px 0 10px;
+}
+
+.freeze-readout-days {
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: #e8f2ff;
+}
+
+.freeze-readout-unit {
+    font-size: 0.8rem;
+    color: #8fa3c0;
+}
+
+.freeze-readout-bonus {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #7fc4ff;
+    font-variant-numeric: tabular-nums;
+}
+
+.freeze-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+}
+
+.freeze-endcap {
+    font-size: 0.72rem;
+    color: #8fa3c0;
+    font-variant-numeric: tabular-nums;
+    flex: none;
+}
+
+.freeze-slider {
+    flex: 1;
+    width: 100%;
+    height: 6px;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 999px;
+    background: linear-gradient(to right,
+            rgba(111, 168, 255, 0.85) var(--freeze-fill, 0%),
+            rgba(120, 140, 180, 0.22) var(--freeze-fill, 0%));
+    outline: none;
+    cursor: pointer;
+}
+
+.freeze-slider::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #dceaff;
+    border: 2px solid #6ea8ff;
+    box-shadow: 0 0 10px rgba(110, 168, 255, 0.55);
+    transition: transform 100ms ease;
+}
+
+.freeze-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.12);
+}
+
+.freeze-slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #dceaff;
+    border: 2px solid #6ea8ff;
+    box-shadow: 0 0 10px rgba(110, 168, 255, 0.55);
+}
+
+.freeze-slider:focus-visible {
+    box-shadow: 0 0 0 2px rgba(111, 168, 255, 0.5);
+}
+
+.freeze-presets {
+    display: flex;
+    gap: 8px;
+    margin: 4px 0 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.freeze-preset {
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(120, 180, 255, 0.35);
+    background: transparent;
+    color: #a9c8ef;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    min-height: 34px;
+    transition: background 120ms ease, color 120ms ease;
+}
+
+.freeze-preset:hover {
+    background: rgba(70, 120, 210, 0.22);
+}
+
+.freeze-preset.active {
+    background: rgba(70, 120, 210, 0.35);
+    color: #e8f2ff;
+    border-color: rgba(120, 180, 255, 0.7);
+}
+
+.freeze-quote {
+    font-size: 0.88rem;
+    margin-bottom: 12px;
+    color: #c6d6ec;
+}
+
+.freeze-quote-cap {
+    font-size: 0.72rem;
+    color: #8fa3c0;
+}
+
+@media (max-width: 480px) {
+    .freeze-readout-days {
+        font-size: 1.9rem;
+    }
+
+    .freeze-readout-bonus {
+        font-size: 1.05rem;
+    }
+
+    .freeze-modal {
+        width: 94vw;
+    }
+
+    .position-side {
+        gap: 6px;
+    }
+
+    .freeze-button {
+        padding: 7px 16px;
+    }
+}
+
+.multiplier-badge.frozen {
+    color: #cfe6ff;
+    background: rgba(70, 120, 210, 0.22);
+    border-color: rgba(120, 180, 255, 0.5);
+}
+
+/* Snowflake reveal: outer span scales 3x → 1x (1.5s), inner span rotates
+   720deg (2s) — independent easings, both decelerating to a full stop. */
+.snowflake {
+    display: inline-block;
+    opacity: 0; /* hidden until its reveal animation runs */
+    text-shadow: none; /* never let an inherited pill shadow rotate with the flake */
+    will-change: transform, opacity;
+}
+.snowflake-rotor {
+    display: inline-block;
+    will-change: transform;
+}
+.snowflake.arrive {
+    animation: flake-scale 1.5s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+.snowflake.arrive .snowflake-rotor {
+    animation: flake-rotate 2s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+@keyframes flake-scale {
+    from { opacity: 1; transform: scale(3); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes flake-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(720deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .snowflake { opacity: 1; }
+    .snowflake.arrive { animation: none; }
+    .snowflake.arrive .snowflake-rotor { animation: none; }
+}
+
+/* ── /freeze feature-page charts ── */
+.freeze-chart-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+.freeze-grid {
+    stroke: rgba(120, 140, 180, 0.14);
+    stroke-width: 1;
+}
+.freeze-tick {
+    fill: var(--text-muted, #8fa3c0);
+    font-size: 9px;
+    font-family: var(--font-mono, monospace);
+}
+.freeze-line {
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px currentColor);
+}
+.freeze-line-label {
+    font-size: 9px;
+    font-family: var(--font-mono, monospace);
+    letter-spacing: 0.06em;
+    text-transform: lowercase;
+}

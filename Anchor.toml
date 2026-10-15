@@ -1,0 +1,88 @@
+[toolchain]
+package_manager = "yarn"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.mainnet]
+# Placeholder pins = the devnet-instance IDs so `anchor build` passes its
+# toml-vs-declare_id check. DEPLOY DAY: run tools/rotate-program-keys.sh to
+# regenerate fresh mainnet keypairs (it syncs EVERY pin, including
+# crank-oracle's manual constants.rs `pub const ID`), then rebuild.
+amm = "6Bx8dfQJzouVLDMLvzj6AKxe91ggbyTtyFFgLeHWBxKn"
+crank_oracle = "D97EMFzMLrszt5FGz2b1NpQ6SQUuQrWpxthAereV4j82"
+staking = "4nR94hVM6gLs7K68RF85GA8Qx7kbGXiWgZqt8gKJwMgE"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "mainnet"
+wallet = "~/.config/solana/la.json"
+
+# ── deploy key GENERATION (mainnet deploy day) ─────────────────────────────────
+
+# tools/rotate-program-keys.sh archives old keypairs, regenerates, and syncs
+# every ID pin — INCLUDING programs/crank-oracle/src/constants.rs `pub const ID`,
+# which anchor NEVER auto-syncs (native program, no declare_id!). Fresh IDs are
+# mandatory, not cosmetic: market_status / market_calendar / bounty_config are
+# PROGRAM-scoped PDAs (no mint in the seeds) — reusing an ID re-derives the
+# same addresses = "already in use" on init. After rotating: anchor deploy, then
+# `anchor run prep` (fresh mint) → `anchor run launch`.
+# A fresh relaunch makes the [provider] wallet the authority on everything
+# (it pays every init) — no multisig anywhere in the flow.
+
+[scripts]
+# ── launch chain ──
+prep = "npx ts-node ./scripts/launch/prep.ts"                        # step 0: mint-create (Token-2022, 0 supply, immutable metadata) + buy-wallet funding sheet; uses target/deploy/afho_token keypair as the mint
+launch = "npx ts-node ./scripts/launch/launch.ts"                    # ONE command: init → amm-init → check-authorities → fund-launch → launch-bundle → set-pools → check-authorities → burn-lp → web-dist (--from <step> resumes; dry prints the plan)
+init = "npx ts-node ./scripts/launch/initialize.ts && npx ts-node ./scripts/launch/init-calendar.ts && npx ts-node ./scripts/launch/init-bounty.ts" # market_status(99 sentinel) → frozen NYSE calendar (payer = calendar authority) → bounty config (devnet clears breaker venues)
+init-o = "npx ts-node ./scripts/launch/initialize.ts"                # market_status only
+amm-init = "npx ts-node ./scripts/launch/amm-init.ts"                # staking pool (with FREEZE_PARAMS — the freeze curve is frozen at init, no setters) + AMM state + empty vaults; writes stakingProgram into deployment.json (claim ALT + app derive from it); LAUNCH_AUTHORITY=<pubkey> = print mode for Squads
+pool = "npx ts-node ./scripts/launch/pool-init.ts"                   # standalone staking pool init (folded into amm-init; kept for manual runs)
+mint-create = "npx ts-node scripts/launch/mint-create.ts"
+fund-launch = "npx ts-node ./scripts/launch/fund-launch.ts"          # THE supply tx: 80% → afho_vault, 20% → pool-seed ATA, mint authority revoked, all in one tx
+launch-bundle = "npx ts-node ./scripts/launch/launch-bundle.ts"      # THE atomic step: Jito bundle [create CPMM pool → buy wallet buys 3% (0.18×USDC_TO_LP) → 6×5M stake lots (STAKE_LOCK_DAYS) → tip]; sequential on devnet; hard balance preflights before anything sends
+create-pool = "npx ts-node scripts/launch/create-pool.ts"            # MANUAL/RECOVERY ONLY — never run bare (a pool created outside the bundle can never be re-bundled; the pool PDA is single-use per mint pair)
+set-pools = "npx ts-node ./scripts/launch/setup-pools.ts"            # pin CPMM + SOL/USDC pools (ownership-validated on-chain) + create/extend the claim ALT
+set-cpmm-pool = "npx ts-node ./scripts/launch/set-cpmm-pool.ts"
+set-sol-usdc-pool = "npx ts-node ./scripts/launch/set-sol-usdc-pool.ts"  # mainnet HARD-REFUSES auto-create — pin the canonical pool only
+create-claim-alt = "npx ts-node ./scripts/launch/create-claim-alt.ts"    # v0 claim lookup table; derives staking keys from deployment.stakingProgram — re-run after any relaunch
+burn-lp = "npx ts-node scripts/launch/burn-lp.ts"                    # burns 100% LP, EXECUTES BY DEFAULT (DRY_RUN=1 previews)
+reclaim = "npx ts-node ./scripts/launch/withdraw-lp.ts"              # pull liquidity back from an unburned pool (POOL_ID=…)
+check-authorities = "npx ts-node ./scripts/launch/check-authorities.ts"  # post-launch invariant: amm/staking/crank-bounty + market_calendar authorities == launch wallet (EXPECTED_AUTHORITY= / EXPECTED_CALENDAR= after rotations); runs twice inside `launch` (before supply + at the end)
+rotate-authorities = "npx ts-node ./scripts/launch/rotate-authorities.ts" # NEW_AUTHORITY=<vault> WHICH=all|amm|staking|crank|calendar; 111…1 = permanent freeze; set-keeper BEFORE rotating amm
+set-keeper = "npx ts-node ./scripts/launch/set-keeper.ts"            # rotate the amm keeper hot wallet (KEEPER=<pubkey>); read-back verified; run BEFORE multisig rotation
+
+web-dist = "bash ./scripts/launch/web-dist.sh"                       # LAST launch step: npm run build in app/ (the typecheck gate — vite dev never typechecks) + zip dist contents → app/dist/dep.zip for upload; verifies deployment.json landed in the zip
+
+# ── ops ──
+set-bounty-usd = "npx ts-node ./scripts/launch/set-bounty-usd.ts"    # live bounty size (USDC raw 6dp)
+fund-bount = "npx ts-node ./scripts/launch/fund-bounty.ts"           # top up the bounty vault with SOL
+cal-check = "npx ts-node ./scripts/ops/calendar-check.ts"            # read-only: live calendar + upcoming bells + on-chain-vs-derived mismatch check
+set-timezone = "npx ts-node ./scripts/ops/set-timezone.ts"           # calendar authority: the ONE tz/DST knob
+set-halt-pools = "npx ts-node ./scripts/ops/set-halt-pools.ts"       # calendar authority: re-pin the SPYx breaker venues (HALT_POOLS=a,b or 0 to disarm); CLMM-ownership-validated
+spyx-layout = "npx ts-node ./scripts/ops/spyx-layout.ts"             # read-only mainnet pool probe (layout canaries)
+pool-status = "npx ts-node ./scripts/ops/raydium-pool-status.ts"     # read-only pool dump
+
+# ── keeper / announcer (VPS: systemd afho-keeper + afho-announcer) ──
+bount-mainnet = "npx ts-node ./scripts/keeper/mev-keeper-mainnet.ts"  # PRODUCTION keeper: calendar cranks + day flows + buyback/dip/rewards/bounty-topup + records; no test modes
+record = "npx ts-node ./scripts/keeper/record-day.ts"                 # records.json ledger row per trading day (incl. staking.frozenAmount since the freeze feature)
+twitter = "npx ts-node ./scripts/keeper/twitter-announcer.ts"         # X/TG announcer
+# VPS note: any relaunch that rewrites deployment.json → svps (sync) + RESTART
+# afho-announcer (it pins PDAs at startup; empty journal ≠ dead — check
+# .announcer-state.json mtime). Stop the PC announcer/bount tabs first:
+#   systemctl restart afho-keeper afho-announcer
+# App deploy bundle: `anchor run web-dist` (build + zip → app/dist/dep.zip).
+
+# ── FREEZE feature notes (staking program) ──────────────────────────────────
+# freeze(index, days): open-only, vested positions; bonus FIXED at freeze
+# time from (momentum, frozen share, days); weight = base × (1+bonus),
+# multiplicative only. Momentum = MarketMetrics.momentum_score (account
+# offset 360, written daily by update_tradeday_stats) — a fresh deployment
+# reads momentum 0 = FULL-BEAR rate card (max days, cap +50%) until the
+# first trading day completes; that is expected, not a bug. settle_freeze is
+# permissionless past freeze_grace_days (default 2) — anyone can sweep an
+# abandoned freeze's unclaimed tail back to the pool. Curve params are
+# init-frozen; the client mirror lives in app/src/lib/freezeCurve.ts.

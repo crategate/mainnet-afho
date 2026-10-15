@@ -1,0 +1,201 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Design tokens — palette, neon accents, tinted glass, and the FX
+   timing system. Every effect duration and sync on the page derives
+   from the variables at the bottom; retune the whole page here.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Animated gradient angle for the slowly rotating rainbow shadows
+   (buy bonds / stake buttons). Browsers without @property support keep
+   the static gradient — the glitch animation still runs. */
+@property --fx-rotor-angle {
+    syntax: '<angle>';
+    inherits: true;
+    initial-value: 0deg;
+}
+
+:root {
+    /* ── Core palette: dark nightlife. Slightly lifted so the tinted
+          glass panes read against the space between them. ── */
+    --bg-primary: #0d0c11;
+    --bg-secondary: #141219;
+    --bg-elevated: #191721;
+    --bg-card: #121016;
+    --bg-input: #100f15;
+
+    --text-primary: #92bdc6;
+    --text-secondary: #9a95a8;
+    --text-muted: #5a5568;
+    --text-dark: #0f0f12;
+    --text-dark-secondary: #3a3a45;
+
+    /* Neon accent colors */
+    --neon-blue: #00f0ff;
+    --neon-pink: #ff2a6d;
+    --neon-purple: #d300f9;
+    --neon-green: #05ffa1;
+    --neon-amber: #ffaa00;
+    --neon-red: #ff2a2a;
+    --neon-cyan: var(--neon-blue);
+
+    /* Border system */
+    --border-subtle: rgba(255, 255, 255, 0.07);
+    --border-neon: rgba(0, 240, 255, 0.3);
+    --border-neon-dim: rgba(0, 240, 255, 0.08);
+
+    /* ── Tinted glass (dark, subtle — see glass.css) ── */
+    --glass-fill: rgba(255, 255, 255, 0.05);
+    --glass-fill-hover: rgba(255, 255, 255, 0.09);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-specular: rgba(255, 255, 255, 0.07);
+    --glass-blur: 14px;
+    --glass-elevation: 0 12px 32px rgba(0, 0, 0, 0.35);
+    --glass-fallback: rgba(19, 18, 24, 0.94);
+
+    /* Backdrop drift (slow colors behind the glass) */
+    --blob-purple: rgba(211, 0, 249, 0.14);
+    --blob-cyan: rgba(0, 240, 255, 0.11);
+    --blob-pink: rgba(255, 42, 109, 0.1);
+    --blob-amber: rgba(255, 170, 0, 0.07);
+
+    /* ── FX timing system ──
+       --fx-base      master tick of every glitch cycle (disconnected)
+       --fx-excite    global excitement multiplier — market state,
+                      wallet connection fold into it (set per shell)
+       --fx-sat       colorfulness of the backlit shadows — connected
+                      shells turn it up a notch
+       --fx-step      checkout/staking step ladder (local: set on a
+                      pane as the user completes its flow; divides
+                      that pane's cycles)
+       --fx-tempo     per-element tempo multiplier (default 1)
+       --fx-*-cycle   derived per-effect cycles. They are ALSO
+                      redefined on each shell (see below) because
+                      custom properties resolve their var() eagerly:
+                      a shell redefinition recomputes them from the
+                      shell's own --fx-base / --fx-excite. Retune
+                      the whole page here. */
+    --fx-base: 16s;
+    --fx-excite: 1;
+    --fx-sat: 1;
+    --fx-shadow-cycle: calc(var(--fx-base) / var(--fx-excite));
+    --fx-border-cycle: calc(var(--fx-base) / var(--fx-excite));
+    --fx-text-cycle: calc(var(--fx-base) * 1.1 / var(--fx-excite));
+    --fx-span-cycle: calc(var(--fx-base) * 1.25 / var(--fx-excite));
+
+    /* Slowly rotating rainbow shadow (buy bonds / stake buttons) */
+    --fx-rotor-cycle: 48s;
+
+    /* Typography */
+    --font-mono: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+    /* Spacing */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+}
+
+/* ═══ Shell-level excitement — one knob per page ═══
+   The derived cycles are redefined on the shell so they recompute
+   from the shell's own --fx-base / --fx-excite (custom properties
+   resolve var() eagerly; :root defaults above only serve content
+   outside a shell, like the wallet modal). */
+
+.app-shell,
+.amm-page-shell {
+    --fx-base: 16s;
+    --fx-excite: 1;
+    --fx-shadow-cycle: calc(var(--fx-base) / var(--fx-excite));
+    --fx-border-cycle: calc(var(--fx-base) / var(--fx-excite));
+    --fx-text-cycle: calc(var(--fx-base) * 1.1 / var(--fx-excite));
+    --fx-span-cycle: calc(var(--fx-base) * 1.25 / var(--fx-excite));
+}
+
+/* Wallet connected: everything lands on a slightly faster, more
+   colorful rhythm — subtle, not frantic. */
+.app-shell[data-connected='true'],
+.amm-page-shell[data-connected='true'] {
+    --fx-base: 11s;
+    --fx-excite: 1.15;
+    --fx-sat: 1.2;
+}
+
+/* Market state: the page runs hottest while the market is open. */
+.app-shell[data-market-state='0'],
+.amm-page-shell[data-market-state='0'] {
+    --fx-excite: 1.3;
+}
+
+.app-shell[data-market-state='1'],
+.amm-page-shell[data-market-state='1'] {
+    --fx-excite: 1;
+}
+
+.app-shell[data-market-state='2'],
+.amm-page-shell[data-market-state='2'] {
+    --fx-excite: 0.72;
+}
+
+.app-shell[data-market-state='3'],
+.amm-page-shell[data-market-state='3'] {
+    --fx-excite: 0.5;
+}
+
+/* ═══ Reduced motion — every effect stripped, content intact ═══ */
+@media (prefers-reduced-motion: reduce) {
+
+    /* border glitch 
+    .neon-glitch::before,
+    .connect-prompt .glitch-border,
+    .offer-card::before,
+    .order-bar::before,
+    .desk-banner::before,
+    .wallet-adapter-modal-container::before,
+    .neon-shadow::after,
+    .connect-prompt::before,
+    .stake-form.rainbow-glow::before,
+    .position-card::after,
+    .claims-header::after,
+    .dashboard-header::after,
+    .offer-card::after,
+    .order-bar[data-order='active']::after,
+    .buy-button.ready::after,
+    .wallet-button-wrapper::before,
+    .amm-controls .wallet-button-wrapper::before,
+    .wallet-adapter-modal-container::after,
+    .desk-banner::after,
+    .text-glitch,
+    .text-glitch-light,
+    .glitch-letters>span,
+    .hero-brand h1 span,
+    .hero-brand .tagline,
+    .landing-section .section-title,
+    .section-subtitle,
+    .stat-value,
+    .wallet-label,
+    .status-pill,
+    .market-status-hero .status-title,
+    .explainer-card h4,
+    .explainer-icon,
+    .multiplier-badge,
+    .grand-total strong,
+    .exit-all-button,
+    .position-card .unstake,
+    .stake-form .stake-submit,
+    .claim-collect,
+    .offer-card-header h3,
+    .offer-card.selected .offer-lot-size,
+    .order-total-label,
+    .order-bar[data-order='active'] .order-total strong,
+    .buy-button.ready,
+    .buy-button.needs-wallet,
+    .offer-soldout,
+    .market-badge.open,
+    .desk-banner.open,
+    /* backdrop drift + ambient washes 
+    .fx-blob,
+    .amm-page-shell::before {
+        animation: none !important;
+    }
+
+    */
+}

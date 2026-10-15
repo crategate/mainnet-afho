@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+  <!-- Trading Halted — circuit breaker tripped: a red breaker bolt over
+       faint hazard banding. Rare state, loud but dark. -->
+  <defs>
+    <linearGradient id="hltfade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0505" stop-opacity="0"/>
+      <stop offset="0.8" stop-color="#0a0505" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#0a0505"/>
+    </linearGradient>
+    <pattern id="hazard" width="46" height="46" patternUnits="userSpaceOnUse"
+      patternTransform="rotate(45)">
+      <rect width="46" height="46" fill="none"/>
+      <rect width="23" height="46" fill="#3d1113" opacity="0.55"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="#0a0606"/>
+  <rect x="0" y="392" width="800" height="26" fill="url(#hazard)"/>
+  <polygon points="430,70 320,265 395,265 345,430 500,225 415,225 480,70"
+    fill="#7e1d22" stroke="#c0392b" stroke-width="7" stroke-linejoin="round"
+    opacity="0.9"/>
+  <g fill="#54191c" opacity="0.8">
+    <rect x="90"  y="330" width="60" height="88" rx="4"/>
+    <rect x="600" y="300" width="60" height="118" rx="4"/>
+  </g>
+  <g stroke="#8a2a2e" stroke-width="6" stroke-linecap="round" opacity="0.7">
+    <line x1="70"  y1="330" x2="170" y2="330"/>
+    <line x1="70"  y1="418" x2="170" y2="418"/>
+    <line x1="580" y1="300" x2="680" y2="300"/>
+    <line x1="580" y1="418" x2="680" y2="418"/>
+  </g>
+  <rect width="800" height="500" fill="url(#hltfade)"/>
+</svg>

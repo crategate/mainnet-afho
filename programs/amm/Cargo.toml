@@ -1,0 +1,27 @@
+[package]
+name = "amm"
+version = "0.1.0"
+description = "OTC bulk AFHO deals. Vesting & buybacks."
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "amm"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build", "staking/idl-build"]
+
+[lints]
+workspace = true
+
+
+[dependencies]
+anchor-lang = { version = "0.31.1", features = ["init-if-needed"]}
+anchor-spl = {version = "0.31.1", features = ["token_2022"]}
+bytemuck = { version = "1", features = ["derive"] }
+staking = { path = "../staking", features = ["cpi"] }

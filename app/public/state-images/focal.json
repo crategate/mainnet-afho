@@ -1,0 +1,229 @@
+{
+ "focal": {
+  "0-open/default/bull.webp": {
+   "x": 51,
+   "y": 51,
+   "auto": {
+    "x": 51,
+    "y": 51
+   },
+   "approved": false
+  },
+  "0-open/default/dabf80-2020-03-nyse-3-webp2000.webp": {
+   "x": 47,
+   "y": 45,
+   "auto": {
+    "x": 47,
+    "y": 45
+   },
+   "approved": false
+  },
+  "0-open/default/open-neon-sign-purple.webp": {
+   "x": 51,
+   "y": 52,
+   "auto": {
+    "x": 51,
+    "y": 52
+   },
+   "approved": false
+  },
+  "0-open/default/psycho-phone.webp": {
+   "x": 55,
+   "y": 56,
+   "auto": {
+    "x": 55,
+    "y": 56
+   },
+   "approved": false
+  },
+  "0-open/default/traders.avif": {
+   "x": 49,
+   "y": 51,
+   "auto": {
+    "x": 49,
+    "y": 51
+   },
+   "approved": false
+  },
+  "0-open/default/wallst.webp": {
+   "x": 50,
+   "y": 52,
+   "auto": {
+    "x": 50,
+    "y": 52
+   },
+   "approved": false
+  },
+  "1-extended/desk-open/bloomberg-terminal.webp": {
+   "x": 44,
+   "y": 59,
+   "auto": {
+    "x": 44,
+    "y": 59
+   },
+   "approved": false
+  },
+  "1-extended/desk-open/club.webp": {
+   "x": 46,
+   "y": 51,
+   "auto": {
+    "x": 46,
+    "y": 51
+   },
+   "approved": false
+  },
+  "1-extended/desk-open/heels.webp": {
+   "x": 55,
+   "y": 58,
+   "auto": {
+    "x": 55,
+    "y": 58
+   },
+   "approved": false
+  },
+  "1-extended/desk-wait/people-waiting-on-their-phones.webp": {
+   "x": 51,
+   "y": 58,
+   "auto": {
+    "x": 51,
+    "y": 58
+   },
+   "approved": false
+  },
+  "1-extended/desk-wait/skeleton.webp": {
+   "x": 51,
+   "y": 41,
+   "auto": {
+    "x": 51,
+    "y": 41
+   },
+   "approved": false
+  },
+  "1-extended/sold-out/Messy-room-after-wild-party-people-sleeping-in-couch-1200x853.webp": {
+   "x": 54,
+   "y": 51,
+   "auto": {
+    "x": 54,
+    "y": 51
+   },
+   "approved": false
+  },
+  "1-extended/sold-out/champagne.webp": {
+   "x": 62,
+   "y": 64,
+   "auto": {
+    "x": 62,
+    "y": 64
+   },
+   "approved": false
+  },
+  "1-extended/sold-out/sad-cat.webp": {
+   "x": 43,
+   "y": 44,
+   "auto": {
+    "x": 43,
+    "y": 44
+   },
+   "approved": false
+  },
+  "2-closed/desk-wait/skeleton.webp": {
+   "x": 60,
+   "y": 53,
+   "auto": {
+    "x": 60,
+    "y": 53
+   },
+   "approved": false
+  },
+  "2-closed/desk-wait/waiting.webp": {
+   "x": 62,
+   "y": 41,
+   "auto": {
+    "x": 62,
+    "y": 41
+   },
+   "approved": false
+  },
+  "2-closed/desk-wait/watch.webp": {
+   "x": 49,
+   "y": 38,
+   "auto": {
+    "x": 49,
+    "y": 38
+   },
+   "approved": false
+  },
+  "2-closed/nite-bonus/639835-unsplash-tra-my-bjl7xcugmny-1503f411705c5f42f9a053df0b2e9181.webp": {
+   "x": 53,
+   "y": 60,
+   "auto": {
+    "x": 53,
+    "y": 60
+   },
+   "approved": false
+  },
+  "2-closed/nite-bonus/club-lasers.webp": {
+   "x": 49,
+   "y": 54,
+   "auto": {
+    "x": 49,
+    "y": 54
+   },
+   "approved": false
+  },
+  "2-closed/nite-bonus/dancing.webp": {
+   "x": 49,
+   "y": 53,
+   "auto": {
+    "x": 49,
+    "y": 53
+   },
+   "approved": false
+  },
+  "2-closed/sold-out/Big-City-Lights.webp": {
+   "x": 60,
+   "y": 63,
+   "auto": {
+    "x": 60,
+    "y": 63
+   },
+   "approved": false
+  },
+  "2-closed/sold-out/Subway-station-in-New-York-City.webp": {
+   "x": 38,
+   "y": 47,
+   "auto": {
+    "x": 38,
+    "y": 47
+   },
+   "approved": false
+  },
+  "2-closed/sold-out/ilse-bing-empire-state-building.v1.webp": {
+   "x": 56,
+   "y": 58,
+   "auto": {
+    "x": 56,
+    "y": 58
+   },
+   "approved": false
+  },
+  "3-halted/ambulance.webp": {
+   "x": 55,
+   "y": 63,
+   "auto": {
+    "x": 55,
+    "y": 63
+   },
+   "approved": false
+  },
+  "3-halted/crowd-looking-up-crop.webp": {
+   "x": 50,
+   "y": 51,
+   "auto": {
+    "x": 50,
+    "y": 51
+   },
+   "approved": false
+  }
+ }
+}

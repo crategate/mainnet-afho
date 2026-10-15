@@ -1,0 +1,320 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FeaturePage — shared shell for the per-feature explainer pages
+   (/oracle, /locking, /authority). Geometry only; glass/neon effects
+   come from the shared tokens already applied via .glass-pane etc.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.feature-section {
+    padding-top: 1.5rem;
+}
+
+.feature-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--neon-cyan);
+    margin: 1.5rem 0 0.75rem;
+}
+
+.feature-headline {
+    font-size: clamp(1.9rem, 6vw, 3.2rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 1rem;
+    color: var(--text-primary);
+    text-wrap: balance;
+}
+
+.feature-lede {
+    font-size: clamp(1rem, 2.6vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+    text-wrap: balance;
+}
+
+/* ─── Card grid ─── */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.1rem;
+    margin: 0 0 2.5rem;
+    text-align: left;
+}
+
+.feature-card {
+    padding: 1.4rem 1.4rem 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+}
+
+.feature-card h3 {
+    margin: 0 0 0.65rem;
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.feature-card-body {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.feature-card-body p {
+    margin: 0 0 0.6rem;
+}
+
+.feature-card-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* ─── Numbered steps ─── */
+.feature-steps {
+    max-width: 760px;
+    margin: 0 auto 2.5rem;
+    padding: 1.5rem 1.6rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    text-align: left;
+}
+
+.feature-steps h3 {
+    margin: 0 0 1.1rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.feature-steps ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.feature-steps li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.feature-step-num {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--border-neon);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--neon-cyan);
+    transform: translateY(0.2rem);
+}
+
+/* ─── Key/value fact rows (Authority page) ─── */
+.feature-rows {
+    max-width: 760px;
+    margin: 0 auto 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    text-align: left;
+}
+
+.feature-row {
+    display: grid;
+    grid-template-columns: minmax(150px, 220px) 1fr;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+}
+
+.feature-row-key {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--neon-cyan);
+    line-height: 1.5;
+}
+
+.feature-row-value {
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.feature-row-value strong {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ─── States table (Oracle page) ─── */
+.feature-table-wrap {
+    max-width: 860px;
+    margin: 0 auto 2.5rem;
+    overflow-x: auto;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+}
+
+.feature-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.feature-table th,
+.feature-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.feature-table th {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.feature-table tr:last-child td {
+    border-bottom: none;
+}
+
+.feature-table td:first-child {
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+/* ─── CTA ─── */
+.feature-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 0 0 2rem;
+}
+
+.feature-cta-button {
+    display: inline-block;
+    padding: 0.7rem 1.6rem;
+    border: 1px solid var(--border-neon);
+    border-radius: 999px;
+    color: var(--neon-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: box-shadow 0.25s ease, color 0.25s ease;
+}
+
+.feature-cta-button:hover {
+    color: var(--text-primary);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.35);
+}
+
+.feature-cta-note {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ─── Live-status slot (Oracle page) ─── */
+.feature-live {
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+    position: relative;
+    z-index: 0;
+}
+
+@media (max-width: 640px) {
+    .feature-row {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+}
+
+/* ─── Squads badge (Authority page) ───
+   The same boxed lockup the homepage Built With strip carries, sized up
+   and centered between the lede and the fact rows. It front-loads the
+   multisig claim the Program authority row makes below. */
+.authority-squads {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 2.5rem;
+}
+
+.authority-squads-tile {
+    flex: 0 0 auto;
+    min-height: 0;
+    padding: 1.9rem 3.75rem;
+}
+
+.authority-squads-logo {
+    height: 96px;
+}
+
+/* ─── Breaker price-source badge (Oracle page) ─── */
+.oracle-source {
+    max-width: 760px;
+    margin: 0 auto 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    padding: 1.1rem 1.4rem;
+    text-align: left;
+}
+
+.oracle-source img {
+    height: 44px;
+    width: 44px;
+    flex-shrink: 0;
+}
+
+.oracle-source p {
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.oracle-source a {
+    color: var(--neon-cyan);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.oracle-source a:hover {
+    border-bottom-color: currentColor;
+}
+
+@media (max-width: 640px) {
+    .oracle-source {
+        flex-direction: column;
+        text-align: center;
+    }
+}

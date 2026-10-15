@@ -1,0 +1,23 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Style manifest. The stylesheet is organized by concern:
+
+   tokens.css      — palette, glass + FX timing variables, shell
+                     excitement knobs, reduced-motion
+   fx-border.css   — border / divider neon flicker (effect #2)
+   fx-shadow.css   — rainbow + colored backlit shadows (effect #1)
+   fx-text.css     — text-shadow glitches + letter/word spans (#3)
+   glass.css       — tinted glass panes + drifting backdrop
+   layout.css      — page shell, sections, grids
+   components.css  — component geometry, colors, fallbacks
+
+   Import order matters: tokens first, then effect systems, then
+   glass (which tints the component panes), then structure.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@import './styles/tokens.css';
+@import './styles/fx-border.css';
+@import './styles/fx-shadow.css';
+@import './styles/fx-text.css';
+@import './styles/layout.css';
+@import './styles/components.css';
+@import './styles/glass.css';

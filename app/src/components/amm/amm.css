@@ -1,0 +1,96 @@
+/* Fixed top-of-page banner explaining the AMM desk state. Full-width, short,
+   dark translucent orange — obvious, but not a solid shout. */
+.home-offer-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 16px;
+    background: rgba(255, 140, 20, 0.13);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    color: #ffb066;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 140, 20, 0.35);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.home-offer-indicator:hover {
+    background: rgba(255, 140, 20, 0.19);
+    border-bottom-color: rgba(255, 140, 20, 0.55);
+}
+
+/* Desk paused by the buyback floor: same orange family, red-shifted — the
+   banner stops advertising a sale and explains the pause instead. */
+.home-offer-indicator.paused {
+    background: rgba(255, 96, 24, 0.11);
+    border-bottom-color: rgba(255, 96, 24, 0.38);
+}
+
+.home-offer-indicator.paused:hover {
+    background: rgba(255, 96, 24, 0.17);
+    border-bottom-color: rgba(255, 96, 24, 0.55);
+}
+
+/* CLOSED-session bonus pill inside the banner — blue, same rounded-pill
+   shape as the desk's .offer-discount. Blue-tints the pill so the extra
+   discount reads at a glance from any page. */
+.indicator-bonus-pill {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--neon-blue, #00f0ff);
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    border-radius: 999px;
+    padding: 2px 10px;
+    flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-offer-indicator {
+        animation: none !important;
+    }
+}
+
+/* Reserves the banner's height in flow so page content starts below it. */
+.home-offer-indicator-spacer {
+    height: 40px;
+}
+
+.indicator-text {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    line-height: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.indicator-text strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffb066;
+    letter-spacing: -0.01em;
+}
+
+.home-offer-indicator.paused .indicator-text strong {
+    color: #ff9d7a;
+}
+
+.indicator-text span {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 176, 102, 0.72);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -1,0 +1,384 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SiteNav — top bar over the hero banner. Full link row on wide
+   screens; collapsible hamburger drawer below --nav-break. Geometry
+   here; glow/border effects reuse the shared fx/glass tokens.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.site-nav {
+    --nav-break: 720px;
+    position: relative;
+    z-index: 20;
+    /* above the hero grid + drifting blobs */
+    padding: 0.75rem 1rem 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.site-nav-bar {
+    max-height: 164px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.logo {
+    max-width: 20vw;
+    max-height: 200px;
+}
+
+.site-nav-brand {
+    color: var(--text-primary);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.35rem 0.6rem;
+}
+
+/* Brand + live price ticker sit as one left group: the ticker floats
+   immediately to the right of the logo. */
+.site-nav-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
+}
+
+.site-nav-ticker {
+    display: inline-flex;
+    align-items: baseline;
+    flex-direction: column;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--glass-fill);
+}
+
+.site-nav-ticker-symbol {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--neon-cyan);
+}
+
+.site-nav-ticker-price {
+    color: var(--text-primary);
+}
+
+/* Source + age of the displayed price: "twap·4s" or "spot·12s". The stale
+   state (snapshot older than 60s — rate-limited stretch or dead socket)
+   dims the whole ticker so a frozen number is never mistaken for live. */
+.site-nav-ticker-meta {
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary, var(--text-secondary));
+    opacity: 0.75;
+}
+
+.site-nav-ticker.stale .site-nav-ticker-price,
+.site-nav-ticker.stale .site-nav-ticker-meta {
+    opacity: 0.45;
+}
+
+.site-nav-ticker.stale .site-nav-ticker-meta {
+    color: var(--neon-amber, var(--text-secondary));
+    opacity: 0.9;
+}
+
+/* ─── Wide screens: inline links ─── */
+.site-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+}
+
+/* ─── Features dropdown ───
+   Desktop: opens on hover or keyboard focus (focus-within covers tabbing
+   into the menu itself). Mobile drawer: the menu unrolls in place — see
+   the 720px block below. */
+.site-nav-features {
+    position: relative;
+}
+
+.site-nav-features-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid transparent;
+    cursor: pointer;
+    font: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+}
+
+.site-nav-features-caret {
+    font-size: 0.62rem;
+    transition: transform 0.25s ease;
+}
+
+.site-nav-features-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 210px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.1rem;
+    padding: 0.55rem;
+    background: var(--glass-fallback);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    box-shadow: var(--glass-elevation);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.site-nav-features:hover .site-nav-features-menu,
+.site-nav-features:focus-within .site-nav-features-menu {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.site-nav-features:hover .site-nav-features-caret,
+.site-nav-features:focus-within .site-nav-features-caret {
+    transform: rotate(180deg);
+}
+
+.site-nav-features-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    padding: 0.5rem 0.6rem;
+    border-radius: 4px;
+    border-bottom: none;
+    text-align: left;
+    transition: color 0.25s ease, background 0.25s ease;
+}
+
+.site-nav-features-item:hover {
+    color: var(--text-primary);
+    background: var(--glass-fill-hover, rgba(255, 255, 255, 0.06));
+}
+
+.site-nav-features-item.active {
+    color: var(--text-primary);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.45);
+}
+
+/* Active state on the toggle mirrors a plain active link. */
+.site-nav-features.active .site-nav-features-toggle {
+    color: var(--text-primary);
+    border-bottom-color: var(--border-neon);
+}
+
+.site-nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    padding: 0.35rem 0.2rem;
+    border-bottom: 1px solid transparent;
+    transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.site-nav-link:hover {
+    color: var(--text-primary);
+    border-bottom-color: var(--border-neon);
+}
+
+.site-nav-link.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--border-neon);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.45);
+}
+
+.site-nav-icon {
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem;
+    transition: color 0.25s ease, filter 0.25s ease;
+}
+
+.site-nav-icon:hover {
+    color: var(--text-primary);
+    filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.6));
+}
+
+/* Raydium swap link uses the brand mark rather than a text label; keep the
+   little R mark compact and aligned with the adjacent social icons. */
+.site-nav-icon .raydium-swap-logo {
+    display: block;
+    width: 18px;
+    height: 20px;
+    object-fit: contain;
+    text-decoration: none;
+}
+
+a.site-nav-icon.raydium-swap-link {
+    text-decoration: none;
+    font-size: .8em;
+}
+
+/* ─── Hamburger (hidden on wide screens) ─── */
+.site-nav-toggle {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--glass-fill);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+}
+
+.site-nav-toggle:hover {
+    color: var(--text-primary);
+    background: var(--glass-fill-hover);
+}
+
+.site-nav-toggle-box {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.site-nav-toggle-line {
+    display: block;
+    width: 16px;
+    height: 1px;
+    background: currentColor;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* Animate to an ✕ when open */
+.site-nav.open .site-nav-toggle-line:nth-child(1) {
+    transform: translateY(5px) rotate(45deg);
+}
+
+.site-nav.open .site-nav-toggle-line:nth-child(2) {
+    opacity: 0;
+}
+
+.site-nav.open .site-nav-toggle-line:nth-child(3) {
+    transform: translateY(-5px) rotate(-45deg);
+}
+
+/* ─── Narrow screens: collapse into a drawer ─── */
+@media (max-width: 720px) {
+    .site-nav {
+        padding: 0.6rem 0.75rem 0;
+    }
+
+    .site-nav-toggle {
+        display: inline-flex;
+    }
+
+    .site-nav-links {
+        position: absolute;
+        top: calc(100% + 0.4rem);
+        left: 0.75rem;
+        right: 0.75rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.2rem;
+        padding: 0.6rem;
+        background: var(--glass-fallback);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        box-shadow: var(--glass-elevation);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+
+        opacity: 0;
+        transform: translateY(-6px);
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .site-nav.open .site-nav-links {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    .site-nav-link {
+        padding: 0.6rem 0.5rem;
+        font-size: 0.8rem;
+        border-bottom: none;
+    }
+
+    /* Drawer: the dropdown unrolls in place under its toggle (which stays
+       as a plain label — nothing to hover on a touch screen). */
+    .site-nav-features-toggle {
+        pointer-events: none;
+        padding: 0.6rem 0.5rem;
+        font-size: 0.8rem;
+        cursor: default;
+    }
+
+    .site-nav-features-menu {
+        position: static;
+        transform: none;
+        opacity: 1;
+        pointer-events: auto;
+        min-width: 0;
+        padding: 0 0 0 0.9rem;
+        background: none;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        transition: none;
+    }
+
+    .site-nav-features-caret {
+        display: none;
+    }
+
+    .site-nav-features-item {
+        padding: 0.45rem 0.5rem;
+        font-size: 0.78rem;
+    }
+
+    .site-nav-icon {
+        padding: 0.6rem 0.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .site-nav-link,
+    .site-nav-icon,
+    .site-nav-toggle-line,
+    .site-nav-links {
+        transition: none;
+    }
+}

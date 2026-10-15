@@ -1,0 +1,56 @@
+# AFHO frontend — SPA routing + compression + caching for Apache/cPanel
+#
+# 1) BrowserRouter deep links (/dash, /offer-desk, …) 404 without a rewrite
+#    back to index.html. This file is copied into dist/ by `vite build`.
+#    NOTE: cPanel File Manager hides dotfiles — enable "Show hidden files"
+#    when uploading, or upload via FTP.
+#
+# 2) index.html is served no-cache so a new deploy is picked up immediately;
+#    hashed /assets/* files are immutable and cached long-term.
+#
+# 3) Output compression: the JS/CSS payload is ~1.3 MB raw but ~385 KB
+#    gzipped — a host that doesn't already compress makes every cold visit
+#    pay ~3× the bytes. Brotli preferred, deflate as fallback; the nested
+#    !mod_brotli guard prevents double compression when both are loaded.
+#    IfModule = no-op wherever the module is missing.
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+    <IfModule !mod_brotli.c>
+        AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+    </IfModule>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Serve existing files and directories as-is (assets, logos, deployment.json)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    # NOTE: <FilesMatch> matches the BASENAME only (last path component) —
+    # patterns like "^assets/…" can never match and were silently dead.
+    # Entry HTML: always revalidate so a new deploy is picked up immediately.
+    <FilesMatch "^index\.html$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </FilesMatch>
+    # Hashed build output: every assets/* filename carries a content hash, so
+    # it is immutable for a year. No non-hashed .js/.css exists anywhere in
+    # dist, which makes the basename form safe.
+    <FilesMatch "\.(js|mjs|css|woff2?)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    # Images (state-images/, img/, Logo/): unhashed paths that can be replaced
+    # under the same name — cache for a day, then revalidate.
+    <FilesMatch "\.(jpe?g|png|webp|avif|gif|svg|ico)$">
+        Header set Cache-Control "public, max-age=86400, must-revalidate"
+    </FilesMatch>
+    # Per-deploy / daily JSON: always revalidate (deployment.json changes per
+    # relaunch; records.json is rewritten by the keeper every trading day).
+    <FilesMatch "^(deployment|records)\.json$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>

@@ -1,0 +1,1439 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Bond Offer Desk — tinted-glass nightlife. Mobile-first (360px
+   baseline), scales up to a 3-col grid.
+
+   Effect keyframes live in ../styles/fx-*.css; this file only wires
+   them to the desk with the desk's own excitement knobs. The desk
+   clock (--fx-desk-cycle) folds --desk-tempo and --desk-excitement
+   into the global FX cycles from tokens.css, and the step ladders
+   (--tier-excite / --order-excite) divide it further as the
+   checkout progresses.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.amm-page-shell {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    padding: 16px 14px 32px;
+    box-sizing: border-box;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    isolation: isolate;
+
+    /* Desk excitement: nearly dead unless the bond desk is open. */
+    --desk-excitement: 0.28;
+    --tier-excite: 1;
+    --order-excite: 1;
+    --desk-tempo: 2;
+
+    /* One derived clock per effect family — retune here or in
+       tokens.css, never in individual rules. */
+    --fx-desk-cycle: calc(var(--fx-border-cycle) * var(--desk-tempo, 2) / var(--desk-excitement, 1));
+    --fx-desk-shadow-cycle: calc(var(--fx-shadow-cycle) * var(--desk-tempo, 2) / var(--desk-excitement, 1));
+    --fx-desk-text-cycle: calc(var(--fx-text-cycle) * var(--desk-tempo, 2) / var(--desk-excitement, 1));
+}
+
+.amm-page-shell[data-desk='waiting'] {
+    --desk-excitement: 0.6;
+}
+
+.amm-page-shell[data-desk='open'] {
+    --desk-excitement: 1.35;
+}
+
+.amm-page-shell[data-desk='soldout'] {
+    --desk-excitement: 0.45;
+}
+
+/* Ambient neon wash, brightening as the desk wakes up (background
+   layer — not one of the glitch effects, never flickers) */
+.amm-page-shell::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(0, 240, 255, 0.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 110%, rgba(255, 42, 109, 0.05) 0%, transparent 55%);
+    opacity: calc(var(--desk-excitement) * 0.8);
+    transition: opacity 1.2s ease;
+}
+
+/* ── topbar ── */
+.amm-topbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+    align-items: center;
+    margin-top: -34px;
+    /* Own stacking context above the offer-list panes below, so the
+       wallet dropdown never falls behind them. */
+    position: relative;
+    isolation: isolate;
+    z-index: 5;
+}
+
+.amm-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.amm-title h1 {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 400;
+    margin: 0 0 4px;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+    animation: textShadowGlitch calc(var(--fx-desk-text-cycle) * 1.3) infinite;
+    animation-delay: var(--glitch-delay, 0s);
+}
+
+.amm-page-shell[data-active='true'] .amm-title h1 {
+    animation-duration: calc(3.5s * var(--desk-tempo, 2));
+}
+
+.amm-page-shell[data-desk='open'] .amm-title h1 {
+    animation-duration: calc(5s * var(--desk-tempo, 2));
+}
+
+.market-badge {
+    display: inline-block;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+.market-badge.open {
+    color: var(--neon-green);
+    border-color: #2f5d43;
+    animation: deskOpenPulse 9s ease-in-out infinite;
+}
+
+@keyframes deskOpenPulse {
+
+    0%,
+    13%,
+    31%,
+    48%,
+    66%,
+    84%,
+    100% {
+        box-shadow: none;
+    }
+
+    10% {
+        box-shadow: 0 0 5px rgba(5, 255, 161, 0.18);
+    }
+
+    28% {
+        box-shadow: 0 0 10px rgba(5, 255, 161, 0.3);
+    }
+
+    45% {
+        box-shadow: 0 0 5px rgba(5, 255, 161, 0.2);
+    }
+
+    63% {
+        box-shadow: 0 0 8px rgba(5, 255, 161, 0.26);
+    }
+
+    81% {
+        box-shadow: 0 0 11px rgba(5, 255, 161, 0.32);
+    }
+}
+
+/* Yellow variant for the offer desk's open banner — same sparse flicker
+   shape as deskOpenPulse, yellow glow instead of the market badge's green
+   (which keeps deskOpenPulse). */
+@keyframes deskOpenPulseYellow {
+
+    0%,
+    13%,
+    31%,
+    48%,
+    66%,
+    84%,
+    100% {
+        box-shadow: none;
+    }
+
+    10% {
+        box-shadow: 0 0 5px rgba(255, 233, 100, 0.18);
+    }
+
+    28% {
+        box-shadow: 0 0 10px rgba(255, 233, 100, 0.3);
+    }
+
+    45% {
+        box-shadow: 0 0 5px rgba(255, 233, 100, 0.2);
+    }
+
+    63% {
+        box-shadow: 0 0 8px rgba(255, 233, 100, 0.26);
+    }
+
+    81% {
+        box-shadow: 0 0 11px rgba(255, 233, 100, 0.32);
+    }
+}
+
+.amm-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.amm-controls .wallet-adapter-button {
+    height: 42px;
+    font-size: 14px;
+}
+
+/* Select-wallet button: rainbow ring while disconnected (same feel as
+   the homepage connect tile), blue/pink once connected. */
+.amm-controls .wallet-button-wrapper {
+    position: relative;
+    /* Raise the wrapper's isolated context (set by the generic
+       .wallet-button-wrapper rule) above the desk's later-DOM panes,
+       cards and the order bar — those create their own stacking contexts
+       (backdrop-filter/transform) and would otherwise paint over the
+       open wallet dropdown. 40 clears every desk element (max z-index 30)
+       and stays below the wallet modal (1040, portaled to body). */
+    z-index: 40;
+    border-radius: var(--radius-sm);
+}
+
+/* Solid button body so the glow behind it can never shine through */
+.amm-controls .wallet-button-wrapper .wallet-adapter-button {
+    background: var(--bg-elevated) !important;
+}
+
+.amm-controls .wallet-button-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: calc(var(--radius-sm) + 3px);
+    z-index: -1;
+    padding: 3px;
+    background: conic-gradient(from 0deg at 50% 50%,
+            var(--neon-purple) 0deg,
+            var(--neon-amber) 70deg,
+            var(--neon-pink) 130deg,
+            var(--neon-cyan) 230deg,
+            var(--neon-purple) 360deg);
+    filter: blur(10px);
+    opacity: 0;
+    animation: rainbowGlitch calc(var(--fx-shadow-cycle) * 1.8) infinite;
+    animation-delay: var(--shadow-delay, 0.2s);
+    pointer-events: none;
+    /* ring-only mask: the glow renders around the button, never through it */
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+}
+
+.amm-page-shell[data-connected='true'] .amm-controls .wallet-button-wrapper::before {
+    background: conic-gradient(from 0deg at 50% 50%,
+            var(--neon-blue) 0deg,
+            var(--neon-pink) 120deg,
+            var(--neon-blue) 240deg,
+            var(--neon-pink) 360deg);
+    animation-name: bluePinkGlitch;
+    animation-duration: calc(var(--fx-shadow-cycle) * 1.8);
+}
+
+.amm-updated {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ── desk banners ── */
+.desk-banner {
+    position: relative;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    padding: 12px 14px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    isolation: isolate;
+}
+
+/* Success banner carries the branded explorer pills next to the copy. */
+.desk-banner.success {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.desk-banner-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Faint broken-neon border, drifting on the desk clock */
+.desk-banner::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid transparent;
+    pointer-events: none;
+    animation: neonFlickerBroken calc(var(--fx-desk-cycle) * 1.1) infinite;
+    animation-delay: var(--glitch-delay, 0.4s);
+}
+
+/* Rainbow backlit shadow behind the banner — sparse ticks on the slow
+   desk clock, never a constant glow */
+.desk-banner::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: inherit;
+    z-index: -1;
+    padding: 5px;
+    background: conic-gradient(from 0deg at 50% 50%,
+            var(--neon-purple) 0deg,
+            var(--neon-amber) 70deg,
+            var(--neon-pink) 130deg,
+            var(--neon-cyan) 230deg,
+            var(--neon-purple) 360deg);
+    filter: blur(12px) saturate(var(--fx-sat, 1));
+    opacity: 0;
+    pointer-events: none;
+    animation: rainbowGlitch calc(var(--fx-desk-shadow-cycle) * 1.2) infinite;
+    animation-delay: var(--shadow-delay, 0.6s);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+}
+
+.desk-banner.open {
+    border-color: rgba(255, 226, 100, 0.5);
+    color: #ffefad;
+    background: linear-gradient(135deg, rgba(255, 226, 100, 0.16), rgba(255, 226, 100, 0.07));
+    animation: deskOpenPulseYellow 10s ease-in-out infinite;
+}
+
+.desk-banner.closed {
+    color: #cbb26a;
+    border-color: #4d4427;
+}
+
+.desk-banner.error {
+    color: #f0a0a0;
+    border-color: #5d2f2f;
+}
+
+.desk-banner.success {
+    color: #b7f0cd;
+    border-color: #2f5d43;
+}
+
+/* Desk paused (open window, no sales): floor ≥ spot, or the live-price
+   snapshot went stale. Orange replaces the old red — "paused", not "error"
+   — and pairs with the yellow open banner. */
+.desk-banner.paused {
+    color: #ffb877;
+    border-color: rgba(255, 158, 0, 0.45);
+    background: rgba(255, 158, 0, 0.13);
+}
+
+.desk-banner.paused::after {
+    opacity: 0.6;
+    animation-duration: calc(var(--fx-desk-shadow-cycle) * 1.8);
+}
+
+/* Success banner rides at the top of the viewport while the buyer scrolls
+   the desk — solid backdrop so content slides under it legibly. */
+.desk-banner--sticky {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    /* Solid fallback first: browsers that drop the color-mix() line (older
+       Firefox) otherwise inherit .glass-pane's 5% white wash — the banner
+       reads fully transparent and page content slides through it. */
+    background: var(--bg-elevated);
+    background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.desk-banner a {
+    color: #8ab4ff;
+}
+
+.desk-banner:hover {
+    border-color: rgba(0, 240, 255, 0.35);
+}
+
+.desk-banner a:hover {
+    text-shadow: 0 0 8px rgba(138, 180, 255, 0.7);
+}
+
+/* ── tier cards: stacked on mobile, one palette per tier ── */
+.offer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.offer-card {
+    position: relative;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--bg-card);
+    padding: 14px 16px;
+
+    /* per-tier neon palette for the border glitch */
+    --card-glow-a: var(--neon-cyan);
+    --card-glow-b: var(--neon-pink);
+    --card-glow-a-soft: rgba(0, 240, 255, 0.4);
+}
+
+.offer-card[data-tier='0'] {
+    --card-glow-a: var(--neon-amber);
+    --card-glow-b: var(--neon-green);
+    --card-glow-a-soft: rgba(255, 170, 0, 0.4);
+}
+
+.offer-card[data-tier='1'] {
+    --card-glow-a: var(--neon-cyan);
+    --card-glow-b: var(--neon-pink);
+    --card-glow-a-soft: rgba(0, 240, 255, 0.4);
+}
+
+.offer-card[data-tier='2'] {
+    --card-glow-a: var(--neon-purple);
+    --card-glow-b: var(--neon-blue);
+    --card-glow-a-soft: rgba(211, 0, 249, 0.45);
+}
+
+/* Broken-neon border: intermittent, random, out of sync per tier.
+   Speeds up with each +1 click (--tier-excite) and with the desk's
+   own excitement. */
+.offer-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid transparent;
+    pointer-events: none;
+    z-index: 1;
+    animation: tierFlicker calc(var(--fx-desk-cycle) / var(--tier-excite, 1)) infinite;
+    animation-delay: var(--glitch-delay, 0s);
+}
+
+/* Idle tiers: one or two sides lit in the tier's palette, and the lit
+   sides + colors change between stages — a shadow that wanders the
+   card on a slow, off-beat clock. Box-shadow only, never through the
+   glass. Selected cards get the full rainbow ring instead. */
+.offer-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0;
+    animation: tierShadowA calc(var(--fx-desk-shadow-cycle) * 1.6 / var(--tier-excite, 1)) infinite;
+    animation-delay: var(--glitch-delay, 0s);
+}
+
+.offer-card[data-tier='1']::after {
+    animation-name: tierShadowB;
+    animation-duration: calc(var(--fx-desk-shadow-cycle) * 1.9 / var(--tier-excite, 1));
+    animation-delay: 2.1s;
+}
+
+.offer-card[data-tier='2']::after {
+    animation-name: tierShadowC;
+    animation-duration: calc(var(--fx-desk-shadow-cycle) * 2.3 / var(--tier-excite, 1));
+    animation-delay: 4.2s;
+}
+
+@keyframes tierShadowA {
+
+    0%,
+    17%,
+    44%,
+    70%,
+    93%,
+    100% {
+        opacity: 0;
+        box-shadow: none;
+    }
+
+    13% {
+        opacity: 1;
+        box-shadow:
+            -7px -7px 14px -4px rgba(255, 170, 0, 0.22),
+            -7px 0 10px -6px rgba(255, 170, 0, 0.14);
+    }
+
+    40% {
+        opacity: 1;
+        box-shadow:
+            7px 0 14px -5px rgba(5, 255, 161, 0.18),
+            2px 0 6px -3px rgba(5, 255, 161, 0.1);
+    }
+
+    66% {
+        opacity: 1;
+        box-shadow:
+            0 8px 12px -5px rgba(255, 170, 0, 0.18),
+            0 2px 6px -3px rgba(255, 170, 0, 0.1);
+    }
+
+    89% {
+        opacity: 1;
+        box-shadow:
+            7px 7px 12px -5px rgba(5, 255, 161, 0.16),
+            0 7px 10px -6px rgba(255, 170, 0, 0.12);
+    }
+}
+
+@keyframes tierShadowB {
+
+    0%,
+    20%,
+    46%,
+    72%,
+    96%,
+    100% {
+        opacity: 0;
+        box-shadow: none;
+    }
+
+    15% {
+        opacity: 1;
+        box-shadow:
+            0 8px 14px -5px rgba(0, 240, 255, 0.2),
+            0 2px 6px -3px rgba(0, 240, 255, 0.1);
+    }
+
+    42% {
+        opacity: 1;
+        box-shadow:
+            7px -7px 12px -5px rgba(255, 42, 109, 0.2),
+            0 -7px 10px -6px rgba(0, 240, 255, 0.14);
+    }
+
+    68% {
+        opacity: 1;
+        box-shadow:
+            -7px 0 14px -5px rgba(0, 240, 255, 0.18),
+            -2px 0 6px -3px rgba(0, 240, 255, 0.1);
+    }
+
+    92% {
+        opacity: 1;
+        box-shadow:
+            -6px -6px 12px -5px rgba(0, 240, 255, 0.16),
+            6px 6px 12px -5px rgba(255, 42, 109, 0.12);
+    }
+}
+
+@keyframes tierShadowC {
+
+    0%,
+    15%,
+    41%,
+    66%,
+    91%,
+    100% {
+        opacity: 0;
+        box-shadow: none;
+    }
+
+    11% {
+        opacity: 1;
+        box-shadow:
+            -7px 7px 14px -4px rgba(211, 0, 249, 0.22),
+            -7px 0 10px -6px rgba(211, 0, 249, 0.14);
+    }
+
+    37% {
+        opacity: 1;
+        box-shadow:
+            0 -7px 12px -5px rgba(0, 240, 255, 0.18),
+            0 -2px 6px -3px rgba(0, 240, 255, 0.1);
+    }
+
+    62% {
+        opacity: 1;
+        box-shadow:
+            7px -7px 12px -5px rgba(211, 0, 249, 0.2),
+            0 -7px 10px -6px rgba(0, 240, 255, 0.14);
+    }
+
+    87% {
+        opacity: 1;
+        box-shadow:
+            7px 0 14px -5px rgba(0, 240, 255, 0.18),
+            2px 0 6px -3px rgba(211, 0, 249, 0.12);
+    }
+}
+
+/* Selected: the tier palette border rhythm plus the full rainbow ring
+   radiating behind. More lots → faster, more saturated rainbow. */
+.offer-card.selected {
+    border-color: rgba(0, 240, 255, 0.35);
+}
+
+.offer-card.selected::before {
+    animation-name: tierFlickerFast;
+    animation-duration: calc(var(--fx-desk-cycle) * 0.6 / var(--tier-excite, 1));
+}
+
+.offer-card.selected::after {
+    inset: -7px;
+    padding: 7px;
+    background: conic-gradient(from 0deg at 50% 50%,
+            var(--neon-purple) 0deg,
+            var(--neon-amber) 70deg,
+            var(--neon-pink) 130deg,
+            var(--neon-cyan) 230deg,
+            var(--neon-purple) 360deg);
+    filter: blur(15px) saturate(calc(var(--fx-sat, 1) + (var(--tier-excite, 1) - 1) * 0.5));
+    box-shadow: none;
+    animation: rainbowGlitch calc(var(--fx-desk-shadow-cycle) * 1.1 / var(--tier-excite, 1)) infinite;
+    animation-delay: 0s;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+}
+
+/* Connected: the selected tier keeps the slow rainbow keyframes — the
+   cycle only eases slightly tighter, it never starts strobing. */
+.amm-page-shell[data-connected='true'] .offer-card.selected::after {
+    animation-duration: calc(var(--fx-desk-shadow-cycle) * 1.0 / var(--tier-excite, 1));
+}
+
+/* Hover: gently quicken the border rhythm, no strobe */
+.offer-card:hover::before {
+    animation-duration: calc(var(--fx-desk-cycle) * 0.5) !important;
+}
+
+/* Sold out: dead sign — dimmed, desaturated, barely sputtering */
+.offer-card.sold-out {
+    opacity: 0.55;
+    filter: saturate(0.3);
+}
+
+.offer-card.sold-out::before {
+    animation: neonFlickerDead 18s infinite;
+    animation-delay: var(--glitch-delay, 0s);
+}
+
+.offer-card.sold-out::after {
+    content: none;
+}
+
+.offer-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* Tier names: light glitching in from a different angle per tier */
+.offer-card-header h3 {
+    margin: 0;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    animation: textShadowDrop calc(var(--fx-desk-text-cycle) * 1.1) infinite;
+    animation-delay: var(--glitch-delay, 0s);
+}
+
+.offer-card[data-tier='0'] .offer-card-header h3 {
+    animation-name: textGlitchLeft;
+}
+
+.offer-card[data-tier='1'] .offer-card-header h3 {
+    animation-name: textGlitchDiag;
+}
+
+.offer-card[data-tier='2'] .offer-card-header h3 {
+    animation-name: textGlitchRight;
+}
+
+.offer-discount {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--neon-green);
+    background: #14231a;
+    border: 1px solid #2f5d43;
+    border-radius: 999px;
+    padding: 2px 10px;
+}
+
+/* CLOSED-session bonus pill — same size/shape as .offer-discount, blue. */
+.offer-discount--bonus {
+    color: var(--neon-blue);
+    background: #101c26;
+    border-color: #2f5470;
+}
+
+/* Price/lot coloring: the header pill reports what the tier actually
+   delivers (effective % off); the listed "up to X% off" ceiling sits on its
+   own muted line under the header, and the price line carries only the
+   price. Green = full listed discount (same green as the pill);
+   blue = late-nite bonus is the live discount; blue↔green pulse = full
+   discount + bonus stacked; muted = the buyback floor ate part of the
+   discount (ratchet active, no bonus). */
+/* Scoped to .offer-facts to out-rank the `.offer-facts dd` color rule —
+   these were silently overridden before the scoping. */
+.offer-facts .offer-price--full {
+    color: var(--neon-green);
+    text-shadow: 0 0 8px rgba(60, 220, 130, 0.55), 0 0 18px rgba(60, 220, 130, 0.3);
+}
+
+.offer-facts .offer-price--full-bonus {
+    color: var(--neon-green);
+    text-shadow: 0 0 8px currentColor, 0 0 18px currentColor;
+    animation: priceDiscountTide 4.8s ease-in-out infinite;
+}
+
+.offer-facts .offer-price--bonus-only {
+    color: var(--neon-blue);
+    text-shadow: 0 0 8px rgba(80, 170, 255, 0.55), 0 0 18px rgba(80, 170, 255, 0.3);
+}
+
+.offer-facts .offer-price--reduced {
+    color: var(--text-muted);
+}
+
+.offer-up-to-row {
+    margin: 2px 0 0;
+    display: flex;
+    flex-direction: row-reverse;
+    font-size: 12px;
+    color: var(--text-muted);
+
+    p {
+        margin: 0;
+    }
+}
+
+.offer-bonus-row {
+    margin: 3px 0 6px;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.offer-lot-size {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 8px 0;
+}
+
+.offer-lot-size span {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.offer-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin: 0 0 12px;
+}
+
+.offer-facts div {
+    display: flex;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.offer-facts dt {
+    color: var(--text-muted);
+}
+
+.offer-facts dd {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* large tap targets for the stepper */
+.qty-stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.qty-stepper button {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    line-height: 1;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.qty-stepper button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.qty-stepper button:not(:disabled):hover {
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.18);
+}
+
+.qty-stepper button:not(:disabled):active {
+    background: var(--bg-elevated);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
+}
+
+/* editable quantity input between the stepper buttons */
+.qty-input {
+    min-width: 72px;
+    width: 72px;
+    height: 48px;
+    padding: 0 8px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty-input:focus {
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.18);
+}
+
+.qty-input:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.offer-soldout {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    animation: soldoutFlicker 10s infinite;
+}
+
+/* Tier tile where the buyback floor holds the price at/above live spot —
+   the claim would revert FloorHeldAtSpot, so the tile says so up front. */
+.offer-card.floor-held {
+    opacity: 0.48;
+    border-color: rgba(255, 107, 107, 0.55);
+    filter: saturate(0.7);
+}
+
+.offer-card.floor-held::after {
+    content: none;
+}
+
+.offer-floor-held {
+    margin: 8px 0 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ff8a8a;
+    animation: soldoutFlicker 10s infinite;
+}
+
+/* Stale-price tiles: the snapshot is too old to quote a buy against. Softer
+   than floor-held (the desk is not dark — data is just late); amber note,
+   muted card until the next poll/ws tick refreshes the price. */
+.offer-card.price-stale {
+    opacity: 0.62;
+    border-color: rgba(255, 193, 107, 0.45);
+    filter: saturate(0.8);
+}
+
+.offer-card.price-stale::after {
+    content: none;
+}
+
+.offer-card.price-stale .offer-floor-held {
+    color: #ffc16b;
+    animation: none;
+}
+
+/* Desk-closed indicator inside the Total Order Size tile — visible BEFORE
+   the buyer tries to add an offer to the cart. */
+.order-desk-closed {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ff8a8a;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 107, 107, 0.45);
+    border-radius: 8px;
+    background: rgba(255, 60, 60, 0.08);
+}
+
+
+
+/* ── order bar: sticky at the bottom on mobile. Border glitch scales
+      with --order-excite (more lots → more excited). ── */
+.order-bar {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.order-bar::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid transparent;
+    pointer-events: none;
+    z-index: 1;
+    animation: neonFlickerBroken calc(var(--fx-desk-cycle) / var(--order-excite, 1)) infinite;
+}
+
+.order-bar[data-order='active']::before {
+    animation-name: neonFlickerSlow;
+    animation-duration: calc(var(--fx-desk-cycle) * 1.4 / var(--order-excite, 1));
+}
+
+/* Active order pane: sparse blue/pink edge glow behind the bar */
+.order-bar[data-order='active']::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+    z-index: -1;
+    padding: 6px;
+    pointer-events: none;
+    background: conic-gradient(from 45deg at 50% 50%,
+            var(--neon-blue) 0deg,
+            var(--neon-pink) 120deg,
+            var(--neon-blue) 240deg,
+            var(--neon-pink) 360deg);
+    filter: blur(14px) saturate(calc(var(--fx-sat, 1) + (var(--order-excite, 1) - 1) * 0.4));
+    opacity: 0;
+    animation: bluePinkGlitch calc(var(--fx-desk-shadow-cycle) / var(--order-excite, 1)) infinite;
+    animation-delay: 1.2s;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+}
+
+.order-bar[data-order='active'] .order-total strong {
+    animation: textShadowRgbSplit calc(var(--fx-desk-text-cycle) * 1.2) infinite;
+    animation-delay: 0.7s;
+}
+
+.order-total-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.order-total strong {
+    font-size: 22px;
+    color: var(--text-primary);
+}
+
+.order-total-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.currency-picker {
+    position: relative;
+    display: inline-flex;
+}
+
+.currency-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 7px 11px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.currency-select:hover {
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+}
+
+.currency-select:active {
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+}
+
+.currency-caret {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.currency-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 170px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    z-index: 30;
+}
+
+.currency-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.currency-option:hover:not(:disabled) {
+    background: var(--bg-input);
+    color: var(--neon-cyan);
+}
+
+.currency-option:disabled {
+    color: var(--text-muted);
+    cursor: default;
+}
+
+.currency-option .hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.pct-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.pct-btn {
+    background: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1;
+    padding: 5px 11px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+}
+
+.pct-btn:hover:not(:disabled) {
+    color: var(--neon-cyan);
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.pct-btn:active:not(:disabled) {
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.pct-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.order-balance {
+    margin-left: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.order-live-price {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.order-total-sub {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* ── buy button ── */
+.buy-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 52px;
+    font-size: 16px;
+    font-weight: 700;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: #863bff;
+    color: #fff;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 0.2s;
+}
+
+.buy-button:not(:disabled):active {
+    background: #7430e8;
+}
+
+.buy-button:disabled {
+    background: var(--bg-input);
+    color: var(--text-muted);
+    cursor: default;
+}
+
+/* Disconnected: eerie, clickable, invites the wallet selector */
+.buy-button.needs-wallet {
+    background: var(--bg-elevated);
+    border-color: var(--border-subtle);
+    color: var(--text-secondary);
+    animation: buyEerie calc(var(--fx-desk-cycle) * 0.8) infinite;
+}
+
+.buy-button.needs-wallet:hover {
+    border-color: rgba(0, 240, 255, 0.6);
+    color: var(--neon-cyan);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.25);
+}
+
+/* Ready (connected + selection): slow irregular glitch + intermittent
+   rainbow ring, quickening only slightly as the order grows */
+.buy-button.ready {
+    animation: buyReadyGlitch 8s infinite;
+}
+
+.buy-button.ready::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 16px;
+    z-index: -1;
+    padding: 6px;
+    background: conic-gradient(from var(--fx-rotor-angle, 0deg) at 50% 50%,
+            var(--neon-purple) 0deg,
+            var(--neon-amber) 70deg,
+            var(--neon-pink) 130deg,
+            var(--neon-cyan) 230deg,
+            var(--neon-purple) 360deg);
+    filter: blur(14px) saturate(calc(var(--fx-sat, 1) + (var(--order-excite, 1) - 1) * 0.5));
+    opacity: 0;
+    pointer-events: none;
+    animation: rainbowGlitch calc(var(--fx-desk-shadow-cycle) * 1.4 / var(--order-excite, 1)) infinite,
+        fxRotorSpin var(--fx-rotor-cycle, 48s) linear infinite;
+    animation-delay: 0.4s;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+}
+
+/* Connected: the glitch cycle only tightens slightly; the rotor stays on
+   its own slow, constant spin. */
+.amm-page-shell[data-connected='true'] .buy-button.ready::after {
+    animation-duration: calc(var(--fx-desk-shadow-cycle) * 1.0 / var(--order-excite, 1)),
+        var(--fx-rotor-cycle, 48s);
+}
+
+.order-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 10px 2px 0;
+}
+
+/* ── interaction burst + hover interplay ── */
+.amm-page-shell[data-glitch-burst='true'] .offer-card::before,
+.amm-page-shell[data-glitch-burst='true'] .order-bar::before {
+    animation-duration: calc(var(--fx-desk-cycle) * 0.35) !important;
+}
+
+.amm-page-shell[data-glitch-burst='true'] .offer-card::after,
+.amm-page-shell[data-glitch-burst='true'] .order-bar::after,
+.amm-page-shell[data-glitch-burst='true'] .buy-button.ready::after,
+.amm-page-shell[data-glitch-burst='true'] .amm-controls .wallet-button-wrapper::before {
+    animation-duration: calc(var(--fx-desk-shadow-cycle) * 0.35),
+        var(--fx-rotor-cycle, 48s) !important;
+}
+
+/* Hovering a tier dims its siblings' glitches so the hovered tile pops */
+.offer-grid:has(.offer-card:hover) .offer-card:not(:hover)::before {
+    opacity: 0.25;
+}
+
+/* Hovering a tier card also gently quickens the order bar below */
+.offer-grid:has(.offer-card:hover)~.order-bar::before {
+    animation-duration: calc(var(--fx-desk-cycle) * 0.5) !important;
+}
+
+/* ── selected tier accents ── */
+
+/* Selected tier numbers: text-shadow glitch instead of movement */
+.offer-card.selected .offer-lot-size {
+    animation: textShadowGlitch calc(5s / var(--tier-excite, 1)) infinite;
+}
+
+.offer-card.selected .qty-input {
+    animation: textShadowShiver 1.8s infinite;
+}
+
+/* ── Connected stage ladder + varied rhythm (desk) ── */
+
+/* Connected: idle tiers shift from broken sputter to an alive buzz;
+   the selected pulse and sold-out dead states still take precedence. */
+.amm-page-shell[data-connected='true'] .offer-card::before {
+    animation-name: neonBuzz;
+    animation-duration: calc(var(--fx-desk-cycle) * 0.75 / var(--tier-excite, 1));
+}
+
+.amm-page-shell .offer-card.selected::before {
+    animation-name: tierFlickerFast;
+    animation-duration: calc(var(--fx-desk-cycle) * 0.8 / var(--tier-excite, 1));
+}
+
+.amm-page-shell .offer-card.sold-out::before {
+    animation-name: neonFlickerDead;
+    animation-duration: 18s;
+}
+
+/* Connected: one faster base tick across tiers and the order pane,
+   but every element keeps its own offset — never synchronized */
+.amm-page-shell[data-connected='true'] .offer-card[data-tier='1']::before {
+    animation-delay: 1.8s;
+}
+
+.amm-page-shell[data-connected='true'] .offer-card[data-tier='2']::before {
+    animation-delay: 3.1s;
+}
+
+.amm-page-shell[data-connected='true'] .order-bar::before {
+    animation-delay: 0.9s;
+}
+
+/* Building an order (not yet buyable) — border glitch speeds with the order */
+.buy-button.has-order:not(.ready) {
+    border-color: rgba(0, 240, 255, 0.5);
+    animation: buyEerie calc(5s / var(--order-excite, 1)) infinite;
+}
+
+/* ── scale up ── */
+@media (min-width: 480px) {
+    .amm-topbar {
+        flex-direction: row;
+        align-items: center;
+        margin-top: -40px;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .offer-grid {
+        gap: 14px;
+    }
+}
+
+@media (min-width: 720px) {
+    .offer-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .amm-topbar {
+        margin-top: -30px;
+    }
+
+    .amm-page-shell {
+        padding: 20px 24px 40px;
+    }
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   Lit desk — the rare alt window (data-desk='lit').
+
+   Same effect grammar as the night desk, re-tuned to a gold / amber /
+   orange palette: the existing per-element shadows recolor via the
+   --card-glow-* and --shadow-* custom properties (no duplicate rules
+   to drift), a cornered backlit layer lands on MORE elements (market
+   badge, order bar, desk banner), and a dedicated sparse flicker-OUT
+   keyframe replaces the steady state — lit is intermittently brighter,
+   never a pulse, never a constant blink. reduced-motion strips it.
+   Names stay generic on purpose: nothing here says what triggers it.
+   ═════════════════════════════════════════════════════════════════ */
+
+.amm-page-shell[data-desk='lit'] {
+    /* gold-warm desk clock: brighter, slightly slower wander */
+    --desk-excitement: 1.8;
+    --desk-tempo: 1.7;
+    --lit-glow-a: #ffb300;
+    --lit-glow-b: #ff7a00;
+    --lit-glow-c: #ffd54f;
+    --lit-glow-soft: rgba(255, 179, 0, 0.45);
+    --lit-glow-deep: rgba(255, 122, 0, 0.28);
+}
+
+/* Recolor the per-tier card glows: every tier reads gold-family, only
+   the shade shifts per tier (deep amber → gold → bright yellow) so the
+   sheet still reads as three distinct tiers. */
+.amm-page-shell[data-desk='lit'] .offer-card[data-tier='0'] {
+    --card-glow-a: var(--lit-glow-a);
+    --card-glow-b: var(--lit-glow-b);
+    --card-glow-a-soft: var(--lit-glow-deep);
+}
+
+.amm-page-shell[data-desk='lit'] .offer-card[data-tier='1'] {
+    --card-glow-a: var(--lit-glow-c);
+    --card-glow-b: var(--lit-glow-a);
+    --card-glow-a-soft: var(--lit-glow-soft);
+}
+
+.amm-page-shell[data-desk='lit'] .offer-card[data-tier='2'] {
+    --card-glow-a: var(--lit-glow-c);
+    --card-glow-b: var(--lit-glow-b);
+    --card-glow-a-soft: rgba(255, 213, 79, 0.5);
+}
+
+/* Cornered backlit gold shadows on MORE elements — badge, order bar and
+   desk banner join the cards. Same maskless box-shadow grammar as
+   tierShadow* (edge-only, never through the glass). */
+.amm-page-shell[data-desk='lit'] .market-badge,
+.amm-page-shell[data-desk='lit'] .order-bar,
+.amm-page-shell[data-desk='lit'] .desk-banner {
+    position: relative;
+    animation: litCorneredShadow calc(var(--fx-desk-shadow-cycle) * 2.2) infinite;
+    animation-delay: var(--glitch-delay, 0.8s);
+}
+
+@keyframes litCorneredShadow {
+
+    0%,
+    30%,
+    33%,
+    72%,
+    100% {
+        box-shadow:
+            -6px -6px 12px -5px var(--lit-glow-soft),
+            6px 6px 12px -5px var(--lit-glow-deep),
+            0 0 10px rgba(255, 179, 0, 0.12);
+        opacity: 1;
+    }
+
+    31.4% {
+        box-shadow:
+            6px -6px 12px -5px var(--lit-glow-soft),
+            -6px 6px 12px -5px var(--lit-glow-deep),
+            0 0 14px rgba(255, 179, 0, 0.18);
+        opacity: 0.92;
+    }
+
+    32.2% {
+        box-shadow:
+            0 0 8px rgba(255, 179, 0, 0.1);
+        opacity: 0.6;
+    }
+
+    73% {
+        box-shadow:
+            -6px 6px 12px -5px var(--lit-glow-soft),
+            6px -6px 12px -5px var(--lit-glow-deep),
+            0 0 12px rgba(255, 179, 0, 0.16);
+        opacity: 0.95;
+    }
+
+    74% {
+        opacity: 0.7;
+    }
+}
+
+/* The shell's own ambient wash warms up while lit (background layer,
+   never flickers). */
+.amm-page-shell[data-desk='lit']::before {
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(255, 179, 0, 0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 110%, rgba(255, 122, 0, 0.07) 0%, transparent 55%);
+}
+
+/* Title reads hot gold while lit. */
+.amm-page-shell[data-desk='lit'] .amm-title h1 {
+    text-shadow:
+        0 0 14px rgba(255, 179, 0, 0.55),
+        0 0 34px rgba(255, 122, 0, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .amm-page-shell[data-desk='lit'] .market-badge,
+    .amm-page-shell[data-desk='lit'] .order-bar,
+    .amm-page-shell[data-desk='lit'] .desk-banner {
+        animation: none;
+        box-shadow:
+            -6px -6px 12px -5px var(--lit-glow-soft),
+            6px 6px 12px -5px var(--lit-glow-deep);
+    }
+}

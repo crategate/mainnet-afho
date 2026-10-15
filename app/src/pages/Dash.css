@@ -1,0 +1,159 @@
+.dash-shell {
+    min-height: 100vh;
+    background: #0b0e14;
+    color: #d7dde8;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 16px 24px;
+    box-sizing: border-box;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dash-topbar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.dash-topbar h1 {
+    font-size: 20px;
+    margin: 0;
+    letter-spacing: 0.04em;
+}
+
+.dash-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dash-updated {
+    font-size: 12px;
+    color: #7a8494;
+}
+
+.dash-toggle {
+    background: #1a2130;
+    border: 1px solid #2e3a4f;
+    color: #d7dde8;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.dash-toggle:hover {
+    background: #232c3f;
+}
+
+.dash-board {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dash-section {
+    border: 1px solid #232b3a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    background: #10151f;
+    opacity: 0.75;
+}
+
+.dash-section.active {
+    opacity: 1;
+    border-color: #2f4262;
+}
+
+.dash-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.dash-section-header h2 {
+    font-size: 14px;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.dash-state-label {
+    font-size: 11px;
+    color: #7a8494;
+    margin-left: auto;
+}
+
+.dash-section.active .dash-state-label {
+    color: #4ade80;
+}
+
+.dash-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dash-dot.on {
+    background: #4ade80;
+    box-shadow: 0 0 6px #4ade8088;
+}
+
+.dash-dot.off {
+    background: #3a4356;
+}
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2px 24px;
+}
+
+.dash-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    padding: 2px 0;
+}
+
+.dash-label {
+    color: #8b95a7;
+    white-space: nowrap;
+}
+
+.dash-value {
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dash-value.mono {
+    font-family: monospace;
+    font-size: 11.5px;
+    color: #9fb4d8;
+}
+
+.dash-error {
+    background: #3a1d22;
+    border: 1px solid #6b2f38;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.dash-loading {
+    color: #7a8494;
+    font-size: 14px;
+}
+
+.dash-missing {
+    font-size: 12px;
+    color: #7a8494;
+    padding: 2px 4px;
+}
