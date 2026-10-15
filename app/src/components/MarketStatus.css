@@ -1,0 +1,271 @@
+.market-status-bg {
+    inset: 0;
+    z-index: 0;
+    /* Containing block for the absolute grid overlay + vignette pseudo —
+       WITHOUT this they position against the outer frame wrapper (no
+       clipping there) and paint square corners past the tile's radius. */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1.5rem;
+    transition: background 1.2s ease, color 0.6s ease;
+    overflow: hidden;
+    font-family: var(--font-sans);
+    border-radius: var(--radius-md);
+    /* Solid base under the tinted gradient so the shadow behind the tile
+       never shows through the body */
+    background-color: var(--bg-primary);
+}
+
+/* ── State Themes ──
+   Each state layers its scene art/photo (set as --status-bg by the
+   component) UNDER the tint gradient, positioned at --status-pos (the
+   per-image focal point; SVG scenes default near center) so cover crops
+   follow the subject: art first, tint on top, palette stays the state's. */
+.market-status-bg[data-market-state="0"] {
+    background:
+        var(--status-bg, none) var(--status-pos, 50% 42%) / cover no-repeat,
+        radial-gradient(ellipse at 50% 0%, rgba(6, 78, 59, 0.35) 0%, rgba(8, 8, 10, 0.95) 100%);
+    --accent: var(--neon-green);
+    --dot: var(--neon-green);
+    color: #ecfdf5;
+}
+
+.market-status-bg[data-market-state="1"] {
+    background:
+        var(--status-bg, none) var(--status-pos, 50% 42%) / cover no-repeat,
+        radial-gradient(ellipse at 50% 0%, rgba(251, 191, 36, 0.15) 0%, rgba(8, 8, 10, 0.95) 100%);
+    --accent: var(--neon-amber);
+    --dot: var(--neon-amber);
+    color: #fffbeb;
+}
+
+.market-status-bg[data-market-state="2"] {
+    background:
+        var(--status-bg, none) var(--status-pos, 50% 42%) / cover no-repeat,
+        radial-gradient(ellipse at 50% 0%, rgba(148, 163, 184, 0.12) 0%, rgba(8, 8, 10, 0.95) 100%);
+    --accent: #94a3b8;
+    --dot: #64748b;
+    color: #f1f5f9;
+}
+
+.market-status-bg[data-market-state="3"] {
+    background:
+        var(--status-bg, none) var(--status-pos, 50% 42%) / cover no-repeat,
+        radial-gradient(ellipse at 50% 0%, rgba(248, 113, 113, 0.18) 0%, rgba(8, 8, 10, 0.95) 100%);
+    --accent: var(--neon-red);
+    --dot: var(--neon-red);
+    color: #fef2f2;
+}
+
+.market-status-bg[data-market-state="99"] {
+    background: var(--bg-card);
+    --accent: #666;
+    --dot: #444;
+    color: #a3a3a3;
+}
+
+/* ── Photo-pool treatment ──
+   Photos sit under: the state tint gradient (background stack) and a
+   plain BLACK border fade (below). No color in the overlay — the state
+   palette lives in the background-stack tint only, so the vignette never
+   reads brown/off-hue. Copy pops via text-shadow, not a blur plate. */
+.market-status-bg[data-photo]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        /* gentle global settle */
+        linear-gradient(rgba(7, 7, 10, 0.16), rgba(7, 7, 10, 0.16)),
+        /* true border fade: four one-directional fades, each sinking in
+           from its own edge. Corners stack two of them (naturally
+           deepest); the middle stays untouched — no radial tunnel. */
+        linear-gradient(to right, rgba(5, 5, 8, 0.5), rgba(5, 5, 8, 0) 15%),
+        linear-gradient(to left, rgba(5, 5, 8, 0.5), rgba(5, 5, 8, 0) 15%),
+        linear-gradient(to bottom, rgba(5, 5, 8, 0.42), rgba(5, 5, 8, 0) 18%),
+        linear-gradient(to top, rgba(5, 5, 8, 0.55), rgba(5, 5, 8, 0) 22%);
+}
+
+/* Copy pop over photos — no blur plate (a masked backdrop patch still
+   read as a cloudy box): a subtle dark text shadow on the three copy
+   lines instead, just enough to lift them off any background. */
+.market-status-bg[data-photo] .status-title,
+.market-status-bg[data-photo] .status-detail,
+.market-status-bg[data-photo] .status-meta,
+.market-status-bg[data-photo] .status-pill {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65), 0 0 12px rgba(0, 0, 0, 0.45);
+}
+
+/* Photo-mode border is SOLID: a translucent border refracts whatever the
+   photo shows at each edge (read as the border "changing color"). */
+.market-status-bg[data-photo] {
+    border: 1px solid #3a4250;
+}
+
+/* ── Animated Grid ── */
+.market-status-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(circle at 50% 50%, black 20%, transparent 70%);
+    animation: gridDrift 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes gridDrift {
+    0% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 0.3;
+    }
+}
+
+/* ── Tile frame ──
+   Shared wrapper class for the tile's effect frame: rounds the wrapper to
+   the tile's own radius so the neon-shadow ring and the neon-glitch
+   flicker border (both `border-radius: inherit` pseudos) hug the rounded
+   corners instead of squaring off around them. No overflow:hidden here —
+   the shadow glow lives OUTSIDE the wrapper box; the tile itself clips
+   the photo (overflow:hidden + border-radius on .market-status-bg). */
+.market-tile-frame {
+    border-radius: var(--radius-md);
+    /* Grid item stretch: the wrapper grows to the row height, this makes
+       the TILE fill the wrapper — equal height with its sibling (Lock &
+       Earn) in the split row. */
+    display: grid;
+}
+
+/* ── Header Content ── */
+.market-status-header {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    width: 100%;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--accent);
+    background: rgba(0, 0, 0, 0.25);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(6px);
+    color: var(--accent);
+}
+
+.status-title {
+    font-size: clamp(2.5rem, 10vw, 5.5rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    margin: 0 0 0.75rem;
+    line-height: 1.05;
+    text-wrap: balance;
+    color: inherit;
+}
+
+.status-detail {
+    font-size: clamp(1rem, 3.5vw, 1.25rem);
+    opacity: 0.9;
+    margin: 0 0 1.5rem;
+    line-height: 1.5;
+    text-wrap: balance;
+    font-weight: 400;
+
+    .glitch-letters.glitch-letters--light.glitch-letters--word span {
+        background: #0000003d;
+    }
+}
+
+.status-meta {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    margin: 0;
+}
+
+.status-error {
+    color: #ef4444;
+}
+
+/* ── Hero variant (landing page) ── */
+.market-status-hero {
+    min-height: 240px;
+    border: 1px solid var(--border-subtle);
+    padding: 2rem 1.5rem;
+}
+
+.market-status-hero .status-pill {
+    margin-bottom: 1rem;
+}
+
+.market-status-hero .status-title {
+    font-size: clamp(2rem, 8vw, 4rem);
+    margin-bottom: 0.5rem;
+}
+
+.market-status-hero .status-detail {
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    margin-bottom: 1rem;
+}
+
+/* ── Compact variant ── */
+.market-status-compact {
+    min-height: auto;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+}
+
+.market-status-compact .status-pill {
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.market-status-compact .status-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.market-status-compact .status-detail {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+/* ── Mobile Tweaks ── */
+@media (max-width: 480px) {
+    .market-status-bg {
+        padding: 1rem;
+    }
+
+    .market-status-hero {
+        padding: 1.5rem 1rem;
+        min-height: 200px;
+    }
+
+    .status-pill {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+    }
+}

@@ -1,0 +1,18 @@
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn
+.env
+**/*.env
+repomix-output.xml
+.aider*
+.codewhale*
+__pycache__/
+*.pyc
+.announcer-state.json
+# Launch-wizard wallet keypairs + session state — NEVER commit.
+keys/
+.wizard-state.json

@@ -1,0 +1,259 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Litepaper page — one tinted glass article on the dark shell.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.litepaper-shell {
+    min-height: 100svh;
+    background: var(--bg-primary);
+    padding: 0 1rem 3rem;
+    box-sizing: border-box;
+    position: relative;
+    overflow-x: clip;
+}
+
+.litepaper {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 2rem auto 0;
+    padding: 2.5rem clamp(1.25rem, 4vw, 3rem);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.litepaper-h1 {
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+    color: var(--text-primary);
+    text-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+}
+
+.litepaper-h2 {
+    font-size: clamp(1.25rem, 4vw, 1.6rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 2.4rem 0 0.9rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-neon-dim);
+    padding-bottom: 0.5rem;
+}
+
+.litepaper-h3 {
+    font-size: 1.05rem;
+    font-weight: 500;
+    margin: 1.6rem 0 0.6rem;
+    color: var(--text-primary);
+}
+
+.litepaper-p {
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin: 0 0 1rem;
+}
+
+.litepaper-quote {
+    margin: 0 0 1.5rem;
+    padding: 0.4rem 0 0.4rem 1rem;
+    border-left: 2px solid var(--border-neon);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.litepaper-list {
+    margin: 0 0 1.2rem;
+    padding-left: 1.4rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.litepaper-list li {
+    margin-bottom: 0.4rem;
+}
+
+.litepaper-list li::marker {
+    color: var(--neon-blue);
+}
+
+.litepaper-p strong,
+.litepaper-list strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.litepaper code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: rgba(0, 240, 255, 0.07);
+    border: 1px solid var(--border-neon-dim);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+    color: var(--text-primary);
+}
+
+.litepaper-table-wrap {
+    overflow-x: auto;
+    margin: 0 0 1.5rem;
+}
+
+.litepaper-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.litepaper-table th,
+.litepaper-table td {
+    text-align: left;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.litepaper-table th {
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+}
+
+.litepaper-hr {
+    border: none;
+    border-top: 1px solid var(--border-neon-dim);
+    margin: 2rem 0;
+}
+
+.litepaper-footer {
+    max-width: 760px;
+    margin: 1.5rem auto 0;
+    text-align: center;
+}
+
+.litepaper-back {
+    color: var(--text-secondary);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    transition: color 0.25s ease;
+}
+
+.litepaper-back:hover {
+    color: var(--text-primary);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Key-numbers charts ({{charts}} block → LitepaperCharts)
+   Dependency-free SVG cards, styled to the glass document.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+    gap: 1rem;
+    margin: 1.75rem 0;
+}
+
+.chart-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.1rem 1.1rem 0.9rem;
+}
+
+.chart-title {
+    margin: 0 0 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.chart-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.chart-label {
+    fill: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.04em;
+}
+
+.chart-value {
+    fill: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.chart-center-top {
+    fill: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 21px;
+}
+
+.chart-center-bottom {
+    fill: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.chart-legend {
+    list-style: none;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.chart-legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.03em;
+    color: var(--text-secondary);
+}
+
+.chart-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex: none;
+}
+
+.chart-note {
+    margin: 0.9rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+/* Nested bullets (the fees section's unstake penalties etc.) */
+.litepaper-sublist {
+    margin: 0.35rem 0 0.1rem;
+    padding-left: 1.2rem;
+}
+
+.litepaper-sublist li {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 0.95em;
+}

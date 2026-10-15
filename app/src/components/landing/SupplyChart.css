@@ -1,0 +1,303 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SupplyStakeChart — two lines (available supply, locked/staked supply),
+   each with a shaded region filling to the baseline. Geometry only;
+   glass material comes from glass.css, the backlit shadow from
+   fx-shadow.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.supply-chart {
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 1.25rem 1.25rem 1rem;
+    text-align: left;
+    margin-top: 40px;
+}
+
+.supply-chart.loading {
+    color: var(--text-muted);
+    text-align: center;
+    padding: 2.5rem 1rem;
+}
+
+.supply-chart-head {
+    margin-bottom: 0.75rem;
+}
+
+.supply-chart-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+}
+
+.supply-chart-value {
+    margin: 0.15rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+}
+
+.supply-chart-sub {
+    margin: 0.5rem 0 0;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+}
+
+.supply-chart-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    cursor: crosshair;
+}
+
+.supply-chart-svg:focus-visible {
+    outline: 1px solid var(--border-neon);
+    outline-offset: 3px;
+}
+
+/* Hover layer: plot wrapper is the tooltip's positioning context. */
+.supply-chart-plot {
+    position: relative;
+}
+
+.supply-chart-crosshair {
+    stroke: var(--text-muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+    opacity: 0.7;
+}
+
+.supply-chart-dot {
+    fill: var(--neon-pink);
+    stroke: #06131a;
+    stroke-width: 1;
+    filter: drop-shadow(0 0 4px rgba(255, 42, 109, 0.8));
+}
+
+.supply-chart-dot-locked {
+    fill: var(--neon-green);
+    stroke: #061409;
+    stroke-width: 1;
+    filter: drop-shadow(0 0 4px rgba(5, 255, 161, 0.8));
+}
+
+.supply-chart-dot-frozen {
+    fill: var(--neon-blue);
+    stroke: rgba(10, 14, 26, 0.9);
+    stroke-width: 1;
+}
+
+.supply-chart-tooltip {
+    position: absolute;
+    transform: translate(-50%, -115%);
+    background: var(--glass-fallback);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    box-shadow: var(--glass-elevation);
+    padding: 0.5rem 0.65rem;
+    min-width: 180px;
+    pointer-events: none;
+    z-index: 6;
+    font-family: var(--font-mono);
+    text-align: left;
+}
+
+.supply-chart-tooltip-date {
+    font-size: 0.66rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+}
+
+.supply-chart-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    padding: 0.1rem 0;
+}
+
+.tt-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.tt-value {
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.tt-value em {
+    font-style: normal;
+    font-size: 0.62rem;
+    margin-left: 0.2rem;
+}
+
+.tt-up {
+    color: var(--neon-green);
+}
+
+.tt-down {
+    color: var(--neon-red);
+}
+
+.tt-pct {
+    color: var(--text-muted);
+}
+
+.supply-chart-gridline {
+    stroke: var(--border-subtle);
+    stroke-width: 1;
+}
+
+.supply-chart-ytick,
+.supply-chart-xtick {
+    fill: var(--text-muted);
+    font-size: 10px;
+    font-family: var(--font-mono);
+}
+
+/* Region under the locked line — bottom layer. */
+.supply-chart-area-locked {
+    fill: rgba(5, 255, 161, 0.16);
+    stroke: none;
+}
+
+/* The LIQUID band between the available and locked lines. */
+.supply-chart-area-band {
+    fill: rgba(255, 42, 109, 0.10);
+    stroke: none;
+}
+
+/* Region under the frozen line (subset of locked). */
+.supply-chart-area-frozen {
+    fill: rgba(0, 240, 255, 0.10);
+    stroke: none;
+}
+
+/* Available supply line — neon pink. */
+.supply-chart-line {
+    fill: none;
+    stroke: var(--neon-pink);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px rgba(255, 42, 109, 0.55));
+}
+
+/* Locked (staked) supply line. */
+.supply-chart-line-locked {
+    fill: none;
+    stroke: var(--neon-green);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px rgba(5, 255, 161, 0.55));
+}
+
+/* Frozen supply line — neon blue. */
+.supply-chart-line-frozen {
+    fill: none;
+    stroke: var(--neon-blue);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px rgba(0, 240, 255, 0.55));
+}
+
+/* In-chart label riding the liquid band. */
+.supply-chart-band-label {
+    fill: rgba(255, 42, 109, 0.75);
+    font-size: 9px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.22em;
+    pointer-events: none;
+}
+
+/* Traveling trace: a short brighter segment gliding along each line
+   (pathLength=100 normalizes the dash math). Slow, steady, no blinking. */
+.supply-chart-trace {
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-dasharray: 5 95;
+    opacity: 0.85;
+    animation: supply-trace 12s linear infinite;
+}
+.supply-chart-trace-available {
+    stroke: rgba(255, 140, 180, 0.95);
+    filter: drop-shadow(0 0 5px rgba(255, 42, 109, 0.8));
+}
+.supply-chart-trace-locked {
+    stroke: rgba(150, 255, 210, 0.95);
+    filter: drop-shadow(0 0 5px rgba(5, 255, 161, 0.8));
+    animation-duration: 15s;
+    animation-delay: -5s;
+}
+.supply-chart-trace-frozen {
+    stroke: rgba(140, 240, 255, 0.95);
+    filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.8));
+    animation-duration: 18s;
+    animation-delay: -11s;
+}
+@keyframes supply-trace {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .supply-chart-trace { animation: none; opacity: 0; }
+}
+
+.supply-chart-legend {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-top: 0.6rem;
+}
+
+.supply-chart-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+}
+
+.supply-chart-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.swatch-available {
+    background: rgba(255, 42, 109, 0.2);
+    border: 1px solid rgba(255, 42, 109, 0.55);
+}
+
+.swatch-staked {
+    background: rgba(5, 255, 161, 0.35);
+    border: 1px solid rgba(5, 255, 161, 0.7);
+}
+.swatch-frozen {
+    background: rgba(0, 240, 255, 0.2);
+    border: 1px solid rgba(0, 240, 255, 0.55);
+}
+.swatch-liquid {
+    background: linear-gradient(135deg, rgba(255, 42, 109, 0.4), rgba(5, 255, 161, 0.4));
+    border: 1px solid rgba(255, 42, 109, 0.55);
+}
+.supply-chart-value-liquid {
+    color: var(--neon-pink);
+    text-shadow: 0 0 12px rgba(255, 42, 109, 0.4);
+}

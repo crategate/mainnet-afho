@@ -1,0 +1,43 @@
+[workspace]
+members = [
+    "programs/*"
+]
+resolver = "2"
+
+# cfg values emitted by proc macros into OUR crates (not declared as cargo
+# features): anchor-lang's `#[program]`/`#[derive(Accounts)]` emit
+# `feature = "anchor-debug"`; solana-program's `entrypoint!` emits
+# `feature = "custom-heap"/"custom-panic"` and `target_os = "solana"`.
+# Declaring them here turns the `unexpected_cfgs` lint from noise into a
+# real check: any NEW unexpected cfg will still warn.
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+    'cfg(feature, values("anchor-debug", "custom-heap", "custom-panic"))',
+    'cfg(target_os, values("solana"))',
+] }
+
+[profile.release]
+overflow-checks = true
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+
+# Size-focused codegen for the two programs that are not on the CU-critical
+# claim path. amm deliberately keeps "s": opt-level="z" is not
+# stack-budget-tested there and initialize_amm blew the SBF stack until "s"
+# (AGENTS.md). Note fat-LTO applies the profile opt-level in the link pass, so
+# per-package gains are partial; measure before assuming.
+[profile.release.package.crank-oracle]
+opt-level = "z"
+
+[profile.release.package.staking]
+opt-level = "z"
+
+# Keep the warning surface clean: `cargo check` / `anchor build` must end
+# with zero warnings (see programs/*/Cargo.toml `[lints] workspace = true`).
+
+[profile.release.build-override]
+opt-level = 3
+incremental = false
+codegen-units = 1

@@ -1,0 +1,716 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Border glitch — the flickering neon sign.
+
+   Borders and section separators sputter on slow, irregular clocks
+   with a bright dispersed shadow, like an unpowered arcade. Nothing
+   here blinks constantly: every keyframe is mostly dark with short
+   bursts. Timings derive from tokens.css (--fx-border-cycle).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Keyframes ─── */
+@keyframes neonGlitch {
+
+    0%,
+    90%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    91% {
+        opacity: .6;
+        box-shadow: 0 0 4px var(--neon-cyan), 0 0 12px #00f0ff4d, 2px 0 4px var(--neon-pink);
+        transform: translate(-1px, 1px);
+    }
+
+    93% {
+        opacity: .3;
+        box-shadow: 0 0 2px var(--neon-purple), -1px 0 4px var(--neon-green);
+        transform: translate(2px, -1px);
+    }
+
+    95% {
+        opacity: .8;
+        box-shadow: 0 0 6px var(--neon-cyan), 0 0 20px #00f0ff33;
+        transform: translate(-1px);
+    }
+
+    97% {
+        opacity: 0;
+        transform: translate(0);
+    }
+}
+
+/* Slow wandering glitch — the nyseh wallet-pane flicker, slowed way down:
+   two brief tick-pairs per cycle at irregular intervals, dark the rest of
+   the time. Slow and unpredictable by design: no constant pulse, no
+   strobe, no shared beat. */
+@keyframes neonFlickerSlow {
+
+    0%,
+    26%,
+    27.6%,
+    55%,
+    56.6%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    26.8% {
+        opacity: 0.28;
+        transform: translate(1px, 0);
+        box-shadow:
+            0 0 4px var(--neon-cyan),
+            0 0 12px rgba(0, 240, 255, 0.2),
+            2px 0 4px var(--neon-pink);
+    }
+
+    27.4% {
+        opacity: 0.14;
+        transform: translate(-1px, 1px);
+        box-shadow:
+            0 0 2px var(--neon-purple),
+            -1px 0 4px var(--neon-green);
+    }
+
+    55.8% {
+        opacity: 0.22;
+        transform: translate(-1px, 0);
+        box-shadow:
+            0 0 3px var(--neon-purple),
+            0 0 10px rgba(211, 0, 249, 0.18),
+            -1px 0 4px var(--neon-pink);
+    }
+
+    56.4% {
+        opacity: 0.1;
+        transform: translate(0);
+    }
+}
+
+/* Broken neon — sputters rarely and weakly, like an abandoned sign */
+@keyframes neonFlickerBroken {
+
+    0%,
+    100% {
+        opacity: 0.04;
+        transform: translate(0);
+    }
+
+    7% {
+        opacity: 0.5;
+        transform: translate(0, 1px);
+        box-shadow: 0 0 3px var(--neon-cyan), 0 0 9px rgba(0, 240, 255, 0.25);
+    }
+
+    8% {
+        opacity: 0.03;
+    }
+
+    8.4% {
+        opacity: 0.3;
+        transform: translate(-1px, 0);
+        box-shadow: 0 0 2px var(--neon-pink);
+    }
+
+    8.7% {
+        opacity: 0.03;
+    }
+
+    46% {
+        opacity: 0.12;
+        box-shadow: 0 0 2px var(--neon-pink), -1px 0 3px var(--neon-cyan);
+    }
+
+    46.8% {
+        opacity: 0.03;
+    }
+
+    78% {
+        opacity: 0.4;
+        transform: translate(1px, 0);
+        box-shadow: 0 0 4px var(--neon-purple), -1px 0 3px var(--neon-pink);
+    }
+
+    79.3% {
+        opacity: 0.03;
+    }
+}
+
+/* Dead neon — almost nothing left, one faint sputter per cycle */
+@keyframes neonFlickerDead {
+
+    0%,
+    100% {
+        opacity: 0.02;
+    }
+
+    12% {
+        opacity: 0.12;
+        box-shadow: 0 0 2px rgba(90, 85, 104, 0.4);
+    }
+
+    13% {
+        opacity: 0.02;
+    }
+
+    61% {
+        opacity: 0.08;
+    }
+
+    62% {
+        opacity: 0.02;
+    }
+}
+
+/* Palette varieties — streetlight (amber/green), violet (purple/pink/
+   blue), ghost (pale white/cyan). Same flicker language as neonGlitch:
+   a long dark rest, then one clustered burst window — three chromatic,
+   jittered stutters (flare / dip / bigger flare) that collapse to dead.
+   Each variant's window sits at a different point in the cycle so two
+   variants on one page never share a beat. No pulsing anywhere. */
+@keyframes neonFlickerStreetlight {
+
+    0%,
+    84%,
+    92.5%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    85% {
+        opacity: 0.55;
+        box-shadow:
+            0 0 4px var(--neon-amber),
+            0 0 12px rgba(255, 170, 0, 0.4),
+            2px 0 4px var(--neon-green);
+        transform: translate(1px, -1px);
+    }
+
+    87.2% {
+        opacity: 0.22;
+        box-shadow:
+            0 0 2px var(--neon-green),
+            -1px 0 5px rgba(5, 255, 161, 0.3);
+        transform: translate(-1px, 0);
+    }
+
+    89.8% {
+        opacity: 0.8;
+        box-shadow:
+            0 0 7px var(--neon-amber),
+            0 0 18px rgba(255, 170, 0, 0.28),
+            -2px 0 4px var(--neon-green);
+        transform: translate(0, 1px);
+    }
+}
+
+@keyframes neonFlickerViolet {
+
+    0%,
+    78%,
+    87.5%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    79% {
+        opacity: 0.65;
+        box-shadow:
+            0 0 4px var(--neon-purple),
+            0 0 12px rgba(211, 0, 249, 0.38),
+            2px 0 4px var(--neon-blue);
+        transform: translate(-1px, 1px);
+    }
+
+    81.4% {
+        opacity: 0.28;
+        box-shadow:
+            0 0 2px var(--neon-pink),
+            -1px 0 5px rgba(255, 42, 109, 0.32);
+        transform: translate(2px, -1px);
+    }
+
+    84.6% {
+        opacity: 0.85;
+        box-shadow:
+            0 0 6px var(--neon-purple),
+            0 0 18px rgba(211, 0, 249, 0.26),
+            1px 0 4px var(--neon-blue);
+        transform: translate(-1px, 0);
+    }
+}
+
+@keyframes neonFlickerGhost {
+
+    0%,
+    90%,
+    97.5%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    91% {
+        opacity: 0.5;
+        box-shadow:
+            0 0 3px rgba(240, 238, 245, 0.7),
+            0 0 10px rgba(0, 240, 255, 0.28),
+            1px 0 4px rgba(240, 238, 245, 0.4);
+        transform: translate(1px, 0);
+    }
+
+    93.4% {
+        opacity: 0.18;
+        box-shadow:
+            0 0 2px rgba(0, 240, 255, 0.55),
+            -1px 0 4px rgba(240, 238, 245, 0.3);
+        transform: translate(-1px, 1px);
+    }
+
+    95.6% {
+        opacity: 0.65;
+        box-shadow:
+            0 0 5px rgba(240, 238, 245, 0.6),
+            0 0 14px rgba(0, 240, 255, 0.2);
+        transform: translate(0, -1px);
+    }
+}
+
+/* Busy buzz — low-amplitude irregular jitter with dropouts */
+@keyframes neonBuzz {
+
+    0%,
+    74%,
+    93.5%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    75% {
+        opacity: 0.5;
+        box-shadow:
+            0 0 3px var(--neon-cyan),
+            0 0 10px rgba(0, 240, 255, 0.3),
+            1px 0 3px var(--neon-pink);
+        transform: translate(1px, 0);
+    }
+
+    77.4% {
+        opacity: 0.18;
+        box-shadow:
+            0 0 2px var(--neon-purple),
+            -1px 0 3px var(--neon-green);
+        transform: translate(-1px, 1px);
+    }
+
+    80% {
+        opacity: 0.62;
+        box-shadow:
+            0 0 5px var(--neon-cyan),
+            0 0 14px rgba(0, 240, 255, 0.24);
+        transform: translate(0, -1px);
+    }
+
+    82.2% {
+        opacity: 0.08;
+        transform: translate(0);
+    }
+
+    88.6% {
+        opacity: 0.55;
+        box-shadow:
+            0 0 4px var(--neon-pink),
+            0 0 12px rgba(255, 42, 109, 0.26),
+            1px 0 3px var(--neon-cyan);
+        transform: translate(-1px, 0);
+    }
+}
+
+/* Slow color-shift flicker: dark for almost the whole cycle, then one
+   late burst where the color world jumps cyan → amber → pink between
+   stutters — the multi-color version of the neonGlitch burst. */
+@keyframes neonShift {
+
+    0%,
+    80%,
+    91.5%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    81% {
+        opacity: 0.5;
+        box-shadow:
+            0 0 4px var(--neon-cyan),
+            0 0 11px rgba(0, 240, 255, 0.3),
+            1px 0 4px var(--neon-amber);
+        transform: translate(1px, 0);
+    }
+
+    83.2% {
+        opacity: 0.16;
+        box-shadow:
+            0 0 2px var(--neon-amber),
+            -1px 0 4px rgba(255, 170, 0, 0.28);
+        transform: translate(-1px, 1px);
+    }
+
+    86.4% {
+        opacity: 0.72;
+        box-shadow:
+            0 0 6px var(--neon-pink),
+            0 0 15px rgba(255, 42, 109, 0.24),
+            1px 0 4px var(--neon-green);
+        transform: translate(0, -1px);
+    }
+
+    89% {
+        opacity: 0.12;
+        transform: translate(0);
+    }
+}
+
+/* Rose sputter */
+@keyframes neonFlickerRose {
+
+    0%,
+    88%,
+    92%,
+    95%,
+    98%,
+    100% {
+        opacity: 0;
+    }
+
+    89% {
+        opacity: 0.55;
+        box-shadow: 0 0 4px var(--neon-pink), 0 0 12px rgba(255, 42, 109, 0.3), 2px 0 4px var(--neon-amber);
+    }
+
+    93% {
+        opacity: 0.22;
+        box-shadow: 0 0 2px var(--neon-amber), -1px 0 4px rgba(255, 170, 0, 0.3);
+    }
+
+    96% {
+        opacity: 0.6;
+        box-shadow: 0 0 6px var(--neon-pink), 0 0 14px rgba(255, 42, 109, 0.25);
+    }
+}
+
+/* Double-tap pattern: two quick flares with a dip between, then a long
+   rest. Same flicker-then-fade direction as neonGlitch, just fewer
+   stutters. Dark the rest of the time — never a constant pulse. */
+@keyframes neonPulseTwo {
+
+    0%,
+    12%,
+    14%,
+    63%,
+    66%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    12.8% {
+        opacity: 0.58;
+        transform: translate(1px, 0);
+        box-shadow:
+            0 0 5px var(--neon-cyan),
+            0 0 12px rgba(0, 240, 255, 0.28);
+    }
+
+    13.4% {
+        opacity: 0.16;
+        transform: translate(-1px, 0);
+        box-shadow:
+            0 0 2px var(--neon-pink),
+            0 0 6px rgba(255, 42, 109, 0.18);
+    }
+
+    63.8% {
+        opacity: 0.66;
+        transform: translate(0, 1px);
+        box-shadow:
+            0 0 6px var(--neon-purple),
+            0 0 15px rgba(211, 0, 249, 0.26);
+    }
+
+    64.6% {
+        opacity: 0.14;
+        transform: translate(0);
+    }
+}
+
+/* Offer tier cards: same broken-neon language as neonGlitch — a long
+   dark rest, then one clustered burst in the tier's own palette:
+   three chromatic, jittered stutters (flare / dip / bigger flare) that
+   collapse to dead. Stages no longer spread across the whole cycle. */
+@keyframes tierFlicker {
+
+    0%,
+    86%,
+    95.5%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    87% {
+        opacity: 0.5;
+        box-shadow:
+            0 0 3px var(--card-glow-a),
+            0 0 9px var(--card-glow-a-soft),
+            1px 0 3px var(--card-glow-b);
+        transform: translate(1px, -1px);
+    }
+
+    89.4% {
+        opacity: 0.18;
+        box-shadow:
+            0 0 2px var(--card-glow-b),
+            -1px 0 3px var(--card-glow-a);
+        transform: translate(-1px, 0);
+    }
+
+    92.2% {
+        opacity: 0.68;
+        box-shadow:
+            0 0 4px var(--card-glow-a),
+            0 0 11px var(--card-glow-a-soft),
+            -1px 0 4px var(--card-glow-b);
+        transform: translate(0, 1px);
+    }
+}
+
+/* Selected tier: the same burst shape, tighter window and higher peaks
+   in the tier palette — still irregular, still no pulse. */
+@keyframes tierFlickerFast {
+
+    0%,
+    76%,
+    90.5%,
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    77% {
+        opacity: 0.72;
+        box-shadow:
+            0 0 4px var(--card-glow-a),
+            0 0 10px var(--card-glow-a-soft);
+        transform: translate(-1px, 0);
+    }
+
+    79.6% {
+        opacity: 0.3;
+        box-shadow:
+            0 0 3px var(--card-glow-b),
+            1px 0 4px var(--card-glow-a);
+        transform: translate(1px, 1px);
+    }
+
+    83% {
+        opacity: 0.9;
+        box-shadow:
+            0 0 6px var(--card-glow-a),
+            0 0 15px var(--card-glow-a-soft),
+            1px 0 4px var(--card-glow-b);
+        transform: translate(0, -1px);
+    }
+
+    86.4% {
+        opacity: 0.2;
+        box-shadow:
+            0 0 2px var(--card-glow-b),
+            -1px 0 3px var(--card-glow-a);
+        transform: translate(0);
+    }
+
+    89% {
+        opacity: 0.55;
+        box-shadow:
+            0 0 4px var(--card-glow-a),
+            0 0 10px var(--card-glow-a-soft);
+        transform: translate(0);
+    }
+}
+
+/* Disconnected buy button: eerie, rare invitation to connect */
+@keyframes buyEerie {
+
+    0%,
+    88%,
+    92%,
+    96%,
+    100% {
+        box-shadow: none;
+    }
+
+    89% {
+        box-shadow: 0 0 8px rgba(0, 240, 255, 0.16), 0 0 16px rgba(255, 42, 109, 0.08);
+    }
+
+    93% {
+        box-shadow: 0 0 5px rgba(211, 0, 249, 0.14);
+    }
+
+    97% {
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.13);
+    }
+}
+
+/* Glitch border — the base flicker applied via ::before */
+.neon-glitch {
+    position: relative;
+}
+
+/* Glitch border — the base flicker applied via ::before.
+   Delay: per-element --glitch-delay (set inline by the tile grids) is the
+   portable fallback; browsers with CSS random() (Chromium 135+) replace it
+   with a stable per-element random offset so tiles never share a beat. */
+.neon-glitch::before {
+    content: "";
+    border-radius: inherit;
+    pointer-events: none;
+    animation: 4s infinite neonGlitch;
+    animation-delay: var(--glitch-delay, 0s);
+    animation-delay: random(0s, 3s);
+    border: 1px solid #0000;
+    position: absolute;
+    inset: -1px;
+
+}
+
+/* Connected: the rhythm shortens a little — it never becomes a strobe. */
+.app-shell[data-connected='true'] .neon-glitch::before,
+.amm-page-shell[data-connected='true'] .neon-glitch::before {
+    animation-duration: 3.4s;
+}
+
+/* Hover: gently quicken the rhythm instead of strobing */
+.neon-glitch:hover::before,
+.app-shell[data-connected='true'] .neon-glitch:hover::before,
+.amm-page-shell[data-connected='true'] .neon-glitch:hover::before {
+    animation-duration: 3s;
+}
+
+/* Burst mode: click/focus/scroll flare quickens all border glitches */
+.app-shell[data-glitch-burst='true'] .neon-glitch::before,
+.amm-page-shell[data-glitch-burst='true'] .neon-glitch::before {
+    animation-duration: 1.8s !important;
+}
+
+/* ─── Variant hooks — same flicker language, different color worlds ─── */
+
+.neon-glitch.glitch-streetlight::before,
+.app-shell[data-connected='true'] .neon-glitch.glitch-streetlight::before,
+.amm-page-shell[data-connected='true'] .neon-glitch.glitch-streetlight::before {
+    animation-name: neonFlickerStreetlight;
+}
+
+.neon-glitch.glitch-violet::before,
+.app-shell[data-connected='true'] .neon-glitch.glitch-violet::before,
+.amm-page-shell[data-connected='true'] .neon-glitch.glitch-violet::before {
+    animation-name: neonFlickerViolet;
+}
+
+.neon-glitch.glitch-ghost::before,
+.app-shell[data-connected='true'] .neon-glitch.glitch-ghost::before,
+.amm-page-shell[data-connected='true'] .neon-glitch.glitch-ghost::before {
+    animation-name: neonFlickerGhost;
+}
+
+.neon-glitch.glitch-shift::before,
+.app-shell[data-connected='true'] .neon-glitch.glitch-shift::before,
+.amm-page-shell[data-connected='true'] .neon-glitch.glitch-shift::before {
+    animation-name: neonShift;
+    animation-duration: calc(var(--fx-border-cycle) * 1.6);
+}
+
+.neon-glitch.glitch-rose::before,
+.app-shell[data-connected='true'] .neon-glitch.glitch-rose::before,
+.amm-page-shell[data-connected='true'] .neon-glitch.glitch-rose::before {
+    animation-name: neonFlickerRose;
+}
+
+.neon-glitch.glitch-double::before,
+.app-shell[data-connected='true'] .neon-glitch.glitch-double::before,
+.amm-page-shell[data-connected='true'] .neon-glitch.glitch-double::before {
+    animation-name: neonPulseTwo;
+}
+
+/* ─── Dividers & section separators ───
+   Removed by request — the full-width thin rainbow separators are
+   gone; sections separate by space and the panes' own glows. ─── */
+
+/* ─── Wallet selector modal: same border language ─── */
+.wallet-adapter-modal-container::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    animation: neonFlickerSlow calc(var(--fx-border-cycle) * 1.75) infinite;
+    animation-delay: var(--glitch-delay, 0s);
+    border: 1px solid transparent;
+}
+
+.wallet-adapter-modal-container:hover::before {
+    animation-duration: calc(var(--fx-border-cycle) * 0.6) !important;
+}
+
+/* ─── Out-of-sync timers: each group runs its own long multiplier so
+       neighboring tile groups sit on different clocks. Per-TILE offsets
+       come from the inline --glitch-delay vars (or the base random()) —
+       no group-level delays here, so tiles inside a group stay off-beat
+       from each other too. ─── */
+.app-shell .stats-section .neon-glitch::before {
+    animation-duration: calc(var(--fx-border-cycle) * 1.5);
+}
+
+.app-shell .explainer-grid .neon-glitch::before {
+    animation-duration: calc(var(--fx-border-cycle) * 2.4);
+}
+
+.app-shell .built-with-grid .neon-glitch::before {
+    animation-duration: calc(var(--fx-border-cycle) * 1.8);
+}
+
+.app-shell .positions-shell.neon-glitch::before {
+    animation-duration: calc(var(--fx-border-cycle) * 2.1);
+}
+
+.app-shell .connect-prompt .glitch-border {
+    animation-duration: calc(var(--fx-border-cycle) * 1.6) !important;
+}
+
+/* Connected: keep the variety, just shorten each group a little so the
+   two states never land on the same rhythm either */
+.app-shell[data-connected='true'] .stats-section .neon-glitch::before {
+    animation-duration: calc(var(--fx-border-cycle) * 1.2);
+}
+
+.app-shell[data-connected='true'] .explainer-grid .neon-glitch::before {
+    animation-duration: calc(var(--fx-border-cycle) * 2.1);
+}
+
+.app-shell[data-connected='true'] .built-with-grid .neon-glitch::before {
+    animation-duration: calc(var(--fx-border-cycle) * 1.5);
+}
+
+.app-shell[data-connected='true'] .positions-shell.neon-glitch::before {
+    animation-duration: calc(var(--fx-border-cycle) * 1.7);
+}
+
+.app-shell[data-connected='true'] .connect-prompt .glitch-border {
+    animation-duration: calc(var(--fx-border-cycle) * 1.3) !important;
+}

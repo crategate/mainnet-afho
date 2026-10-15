@@ -1,0 +1,503 @@
+/* The Tape (/activity) — a two-line row tape on the app's dark glass.
+ * Structure per row: big date/time left, one detail line, then the event
+ * tag, amount and tx link on the right. Column labels float in a frosted
+ * bar. The bar and the rows share one grid (`.act-grid`); every cell
+ * carries an `act-c-*` area name so narrow screens re-arrange both
+ * identically. No overflow on any ancestor: sticky dies in a scroll
+ * container. */
+
+.act-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px 64px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 100vh;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    /* Static ambient wash (blob-tinted, nothing animated): the landing's
+       drifting blobs starved this webview's main thread — blur + clip +
+       transform on 55vmax elements never yields a frame — so the color
+       rides plain gradients instead. */
+    background:
+        radial-gradient(ellipse at 50% -10%, rgba(0, 240, 255, 0.05), transparent 55%),
+        radial-gradient(ellipse 60% 40% at -10% 18%, var(--blob-purple), transparent 70%),
+        radial-gradient(ellipse 50% 35% at 108% 55%, var(--blob-cyan), transparent 70%);
+}
+
+/* ── header ─────────────────────────────────────────────────────────────── */
+.act-toprow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 26px;
+}
+
+.act-nav {
+    display: flex;
+    gap: 20px;
+}
+
+.act-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11.5px;
+}
+
+.act-nav a:hover,
+.act-nav a:focus-visible {
+    color: var(--text-primary);
+}
+
+/* wallet trigger sizing/theming lives with the component
+   (.afho-wallet-dropdown rules in components.css) */
+
+.act-title {
+    margin: 18px 0 0;
+    font-size: 30px;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.act-subtitle {
+    margin: 8px 0 0;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    font-style: italic;
+    text-align: center;
+}
+
+/* connect prompt spacing (visuals come from the shared .connect-prompt) */
+.act-connect {
+    max-width: 520px;
+    margin: 48px auto 0;
+}
+
+/* ── controls row ───────────────────────────────────────────────────────── */
+.act-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 22px 0 10px;
+}
+
+.act-count {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.act-toggle {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--text-secondary);
+    background: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.act-toggle:hover,
+.act-toggle:focus-visible {
+    color: var(--neon-cyan);
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.act-toggle:disabled {
+    opacity: 0.5;
+    cursor: default;
+    box-shadow: none;
+}
+
+.act-retry {
+    margin-left: 10px;
+}
+
+/* ── shared grid: bar + rows ────────────────────────────────────────────── */
+.act-grid {
+    display: grid;
+    grid-template-columns: 176px minmax(0, 1fr) 136px 108px 156px;
+    gap: 0 18px;
+    align-items: center;
+}
+
+/* ── floating label bar ─────────────────────────────────────────────────── */
+.act-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: 9px 16px;
+    border-left: 2px solid transparent; /* keeps labels aligned with row accents */
+    background: rgba(13, 12, 17, 0.86);
+    backdrop-filter: blur(12px) saturate(1.3);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
+    border-bottom: 1px solid var(--border-neon);
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-secondary);
+}
+
+.act-c-afho,
+.act-c-tx {
+    text-align: right;
+}
+
+/* ── the sheet: tinted glass under the rows ─────────────────────────────── */
+.act-sheet {
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.008));
+    box-shadow: var(--glass-elevation);
+    /* no overflow rule on purpose: hidden would clip the sticky bar into a
+     * dead scroll container */
+}
+
+.act-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── rows: two lines, kind-accented left edge ───────────────────────────── */
+.act-row {
+    padding: 10px 16px 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 2px solid rgba(154, 149, 168, 0.18);
+    transition: background 0.15s, border-left-color 0.15s, box-shadow 0.15s;
+}
+
+.act-rows .act-row:last-child {
+    border-bottom: none;
+}
+
+.act-row:hover {
+    background: rgba(0, 240, 255, 0.03);
+}
+
+/* manual transfers + DEX fills: dimmed until hovered */
+.act-row[data-manual='true'] {
+    opacity: 0.55;
+}
+
+.act-row[data-manual='true']:hover {
+    opacity: 0.85;
+}
+
+/* when: big timestamp block, the row's anchor */
+.act-when {
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+
+.act-when-date {
+    display: block;
+    font-size: 1.12rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+}
+
+.act-when-time {
+    display: block;
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+}
+
+/* detail: one line, never wraps the row taller */
+.act-detail {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* event tag: glyph + label, color carries the kind */
+.act-event {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.act-glyph {
+    font-size: 0.72rem;
+    line-height: 1;
+}
+
+.act-event .snowflake {
+    font-size: 0.75rem;
+}
+
+.act-row[data-kind='stake'] .act-event {
+    color: rgba(0, 240, 255, 0.9);
+    text-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+}
+
+.act-row[data-kind='freeze'] .act-event {
+    color: rgba(143, 208, 255, 0.9);
+    text-shadow: 0 0 14px rgba(143, 208, 255, 0.35);
+}
+
+.act-row[data-kind='settle'] .act-event {
+    color: rgba(143, 208, 255, 0.6);
+    text-shadow: 0 0 14px rgba(143, 208, 255, 0.2);
+}
+
+.act-row[data-kind='unstake'] .act-event {
+    color: rgba(255, 170, 0, 0.9);
+    text-shadow: 0 0 14px rgba(255, 170, 0, 0.3);
+}
+
+.act-row[data-kind='claim'] .act-event {
+    color: rgba(5, 255, 161, 0.9);
+    text-shadow: 0 0 14px rgba(5, 255, 161, 0.35);
+}
+
+.act-row[data-kind='bond'] .act-event,
+.act-row[data-kind='position'] .act-event {
+    color: rgba(211, 0, 249, 0.9);
+    text-shadow: 0 0 14px rgba(211, 0, 249, 0.35);
+}
+
+.act-row[data-kind='position'] .act-event {
+    color: rgba(211, 0, 249, 0.6);
+}
+
+.act-row[data-kind='sent'] .act-event,
+.act-row[data-kind='received'] .act-event,
+.act-row[data-kind='swap'] .act-event,
+.act-row[data-kind='protocol'] .act-event {
+    color: var(--text-secondary);
+}
+
+/* left-edge accents mirror the tag colors, dim at rest, lit on hover */
+.act-row[data-kind='stake'] {
+    border-left-color: rgba(0, 240, 255, 0.25);
+}
+
+.act-row[data-kind='stake']:hover {
+    border-left-color: rgba(0, 240, 255, 0.8);
+    box-shadow: inset 4px 0 12px -6px rgba(0, 240, 255, 0.5);
+}
+
+.act-row[data-kind='freeze'],
+.act-row[data-kind='settle'] {
+    border-left-color: rgba(143, 208, 255, 0.25);
+}
+
+.act-row[data-kind='freeze']:hover,
+.act-row[data-kind='settle']:hover {
+    border-left-color: rgba(143, 208, 255, 0.8);
+    box-shadow: inset 4px 0 12px -6px rgba(143, 208, 255, 0.5);
+}
+
+.act-row[data-kind='unstake'] {
+    border-left-color: rgba(255, 170, 0, 0.25);
+}
+
+.act-row[data-kind='unstake']:hover {
+    border-left-color: rgba(255, 170, 0, 0.8);
+    box-shadow: inset 4px 0 12px -6px rgba(255, 170, 0, 0.5);
+}
+
+.act-row[data-kind='claim'] {
+    border-left-color: rgba(5, 255, 161, 0.25);
+}
+
+.act-row[data-kind='claim']:hover {
+    border-left-color: rgba(5, 255, 161, 0.8);
+    box-shadow: inset 4px 0 12px -6px rgba(5, 255, 161, 0.5);
+}
+
+.act-row[data-kind='bond'],
+.act-row[data-kind='position'] {
+    border-left-color: rgba(211, 0, 249, 0.25);
+}
+
+.act-row[data-kind='bond']:hover,
+.act-row[data-kind='position']:hover {
+    border-left-color: rgba(211, 0, 249, 0.8);
+    box-shadow: inset 4px 0 12px -6px rgba(211, 0, 249, 0.5);
+}
+
+/* amount */
+.act-afho {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.88rem;
+    white-space: nowrap;
+}
+
+.act-afho-num {
+    color: var(--text-primary);
+}
+
+.act-afho-num[data-sign='pos'] {
+    color: rgba(5, 255, 161, 0.85);
+    text-shadow: 0 0 12px rgba(5, 255, 161, 0.25);
+}
+
+.act-afho-num[data-sign='neg'] {
+    color: rgba(255, 122, 143, 0.9);
+    text-shadow: 0 0 12px rgba(255, 122, 143, 0.2);
+}
+
+.act-afho-num[data-sign='zero'] {
+    color: var(--text-muted);
+}
+
+/* tx link + hover logo */
+.act-tx {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.act-scan {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.act-scan:hover,
+.act-scan:focus-visible {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+}
+
+.act-scan-mark {
+    display: inline-flex;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.act-scan:hover .act-scan-mark,
+.act-scan:focus-visible .act-scan-mark {
+    opacity: 1;
+    transform: none;
+}
+
+/* ── notes, footer ──────────────────────────────────────────────────────── */
+.act-note {
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.act-foot {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.act-exhausted {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.act-foot-note {
+    margin: 0;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    max-width: 640px;
+}
+
+/* ── narrow screens: two lines per row ──────────────────────────────────── */
+@media (max-width: 780px) {
+    .act-grid {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            'when when tx'
+            'event detail afho';
+        gap: 2px 12px;
+    }
+
+    .act-c-when {
+        grid-area: when;
+    }
+
+    .act-c-detail {
+        grid-area: detail;
+    }
+
+    .act-c-event {
+        grid-area: event;
+    }
+
+    .act-c-afho {
+        grid-area: afho;
+    }
+
+    .act-c-tx {
+        grid-area: tx;
+    }
+
+    .act-bar {
+        grid-template-areas: 'when tx';
+    }
+
+    .act-bar .act-c-detail,
+    .act-bar .act-c-event,
+    .act-bar .act-c-afho {
+        display: none;
+    }
+
+    /* date + time ride inline as the row's first line */
+    .act-when {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+    }
+
+    .act-when-date {
+        font-size: 1.02rem;
+    }
+
+    .act-when-time {
+        font-size: 0.88rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .act-scan-mark,
+    .act-row {
+        transition: none;
+    }
+}

@@ -1,0 +1,39 @@
+[package]
+name = "crank-oracle"
+version = "0.1.0"
+description = "AFHO market-status crank oracle (on-chain NYSE calendar PDA + permissionless transition bounty)"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "crank_oracle"
+
+[features]
+default = []
+# The anchor CLI requires this feature to exist and uses it to regenerate
+# target/idl/crank_oracle.json from src/idl_spec.rs (the frozen anchor wire
+# contract). anchor-lang is ONLY compiled for IDL generation — the deployed
+# binary (default features) has no anchor-lang. The native implementation is
+# the only deployed code; `idl_discriminators_match` fails on drift.
+idl-build = [
+    "dep:anchor-lang",
+    "anchor-lang/idl-build",
+]
+
+[lints]
+workspace = true
+
+[dependencies]
+solana-program = "2.2"
+anchor-lang = { version = "0.31.1", optional = true }
+# Pin these to avoid constant_time_eq v0.4.2 which requires edition2024
+# (host-side transitive deps under litesvm/toolchain; inert on-chain).
+blake3 = "=1.8.2"
+constant_time_eq = "=0.3.1"
+
+[dev-dependencies]
+litesvm = "=0.6.1"
+solana-sdk = "2.2"
+serde_json = "1"
+hex = "0.4"
+openssl = { version = "0.10.74", features = ["vendored"] }
