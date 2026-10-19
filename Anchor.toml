@@ -35,6 +35,7 @@ wallet = "~/.config/solana/la.json"
 
 [scripts]
 # ── launch chain ──
+deploy = "npx ts-node ./scripts/launch/deploy-wizard.ts"              # THE one-command deploy: fresh wallets (phrase + confirm-a-word) → funding bars → rotate keys → anchor deploy → prep → launch chain → set-keeper + manifest. DEPLOY_CLUSTER=devnet for full-flow rehearsal; -- --dry gates only; refuses mainnet outside this repo
 prep = "npx ts-node ./scripts/launch/prep.ts"                        # step 0: mint-create (Token-2022, 0 supply, immutable metadata) + buy-wallet funding sheet; uses target/deploy/afho_token keypair as the mint
 launch = "npx ts-node ./scripts/launch/launch.ts"                    # ONE command: init → amm-init → check-authorities → fund-launch → launch-bundle → set-pools → check-authorities → burn-lp → web-dist (--from <step> resumes; dry prints the plan)
 init = "npx ts-node ./scripts/launch/initialize.ts && npx ts-node ./scripts/launch/init-calendar.ts && npx ts-node ./scripts/launch/init-bounty.ts" # market_status(99 sentinel) → frozen NYSE calendar (payer = calendar authority) → bounty config (devnet clears breaker venues)
