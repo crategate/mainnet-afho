@@ -12,6 +12,12 @@ import {
     Transaction,
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
+import {
+    TOKEN_PROGRAM_ID,
+    createAssociatedTokenAccountInstruction,
+    createTransferInstruction,
+    getAssociatedTokenAddressSync,
+} from "@solana/spl-token";
 import { resolveSolanaConfig, Cluster } from "../lib/cluster";
 import { usdcMintFor } from "../lib/cpmm";
 import { derivePoolId } from "../lib/cpmm";
@@ -230,66 +236,91 @@ async function fundingPhase(
         keeper: new PublicKey(wallets.keeper),
     };
 
-    hr("FUNDING — send to these addresses, the bars fill as balances land");
-    for (const role of ROLE_WALLETS) {
-        console.log(`  ${role.padEnd(8)} ${wallets[role]}`);
-        console.log(`  ${"".padEnd(8)} needs ${needs[role].sol} SOL` +
-            (needs[role].usdc ? ` + ${needs[role].usdc} USDC` : "") +
-            `  (${needs[role].note})`);
+    // The calling wallet = the solana CLI config keypair. It funds everything
+    // and holds NO protocol power afterwards (authorities are the fresh launch
+    // wallet, keeper the fresh keeper wallet). One honest funding graph:
+    // calling → launch/buyer/keeper, disclosed dev buy, LP burned.
+    const callingPath = resolveSolanaConfig().keypairPath;
+    const calling = callingPath && fs.existsSync(callingPath) ? loadKeypair(callingPath) : null;
+
+    hr("FUNDING");
+    const totalSol = needs.launch.sol + needs.buyer.sol + needs.keeper.sol + 0.1; // + fee/pad
+    const totalUsdc = needs.launch.usdc + needs.buyer.usdc;
+
+    if (calling) {
+        const cb = await balances(conn, calling.publicKey, usdcMint);
+        console.log(`  calling wallet: ${calling.publicKey.toBase58()}  (${path.relative(ROOT, callingPath!)} )`);
+        bar("caller SOL", cb.sol, totalSol, "SOL");
+        if (totalUsdc > 0) bar("caller USDC", cb.usdc, totalUsdc, "USDC");
+        const padSol: Record<Role, number> = { launch: 0.5, buyer: 0.01, keeper: 0.1 };
+        if (cb.sol >= totalSol && cb.usdc >= totalUsdc) {
+            console.log(`\n  Transfers (with a little padding):`);
+            for (const role of ROLE_WALLETS) {
+                const legs = [`${(needs[role].sol + padSol[role]).toFixed(2)} SOL`];
+                if (needs[role].usdc) legs.push(`${needs[role].usdc} USDC`);
+                console.log(`    ${role.padEnd(7)} ${wallets[role]}  ←  ${legs.join(" + ")}`);
+            }
+            if (await confirm(`\n  Confirm to fund all three from the calling wallet balance?`, true)) {
+                const callerUsdcAta = getAssociatedTokenAddressSync(usdcMint, calling.publicKey, false, TOKEN_PROGRAM_ID);
+                for (const role of ROLE_WALLETS) {
+                    const tx = new Transaction();
+                    if (needs[role].usdc > 0) {
+                        const ata = getAssociatedTokenAddressSync(usdcMint, pubs[role], false, TOKEN_PROGRAM_ID);
+                        tx.add(createAssociatedTokenAccountInstruction(calling.publicKey, ata, pubs[role], usdcMint));
+                        tx.add(createTransferInstruction(
+                            callerUsdcAta, ata, calling.publicKey,
+                            BigInt(Math.round(needs[role].usdc * 1e6)), [], TOKEN_PROGRAM_ID,
+                        ));
+                    }
+                    tx.add(SystemProgram.transfer({
+                        fromPubkey: calling.publicKey,
+                        toPubkey: pubs[role],
+                        lamports: Math.round((needs[role].sol + padSol[role]) * LAMPORTS_PER_SOL),
+                    }));
+                    const sig = await sendAndConfirmTransaction(conn, tx, [calling]);
+                    console.log(`    ✓ ${role} funded: ${sig}`);
+                }
+            }
+        } else if (calling) {
+            console.log(`\n  ⚠ calling wallet is short of the ~${totalSol.toFixed(2)} SOL` +
+                (totalUsdc ? ` + ${totalUsdc} USDC` : "") +
+                ` total.\n    Top it up (exchanges take minutes), or fund the addresses below by hand.`);
+        }
+    } else {
+        console.log("  ⚠ no solana CLI keypair found — manual funding mode.");
     }
-    console.log(`\n  USDC mint (${cluster}): ${usdcMint.toBase58()} — send plain SPL-USDC, not from a program deposit.`);
-    if (cluster === "devnet") console.log("  devnet: SOL airdrop is automatic below if the faucet allows; USDC via your devnet reserve.");
 
-    await pause("Fund the addresses (exchanges/withdrawals can take minutes). Press ENTER to start watching…");
+    // Live bars until every leg has landed (works for both funding modes).
+    console.log(`\n  Wallet addresses (manual fallback):`);
+    for (const role of ROLE_WALLETS) {
+        console.log(`    ${role.padEnd(7)} ${wallets[role]}  needs ${needs[role].sol} SOL` +
+            (needs[role].usdc ? ` + ${needs[role].usdc} USDC` : ""));
+    }
+    if (totalUsdc > 0) console.log(`  USDC mint (${cluster}): ${usdcMint.toBase58()} — plain SPL-USDC transfers.`);
 
-    let autoSent = false;
     for (;;) {
+        console.log("");
         const rows: Record<Role, Awaited<ReturnType<typeof balances>>> = {} as never;
         for (const role of ROLE_WALLETS) rows[role] = await balances(conn, pubs[role], usdcMint);
-        console.log("");
         let allMet = true;
         for (const role of ROLE_WALLETS) {
             const metSol = bar(`${role} SOL`, rows[role].sol, needs[role].sol, "SOL");
             const metUsdc = needs[role].usdc === 0 || bar(`${role} USDC`, rows[role].usdc, needs[role].usdc, "USDC");
             allMet = allMet && metSol && metUsdc;
         }
-
         if (allMet) {
             console.log("\n  ✓ every wallet funded above its requirement.");
             break;
         }
-
-        // Optional SOL top-up legs from the (funded) launch wallet.
-        if (!autoSent && rows.launch.sol >= needs.launch.sol + 0.6 &&
-            await confirm("\n  Launch wallet has spare SOL — auto-send the buyer + keeper SOL legs from it?", false)) {
-            const launch = loadKeypair(walletPath("launch"));
-            for (const [role, amount] of [["buyer", 0.05], ["keeper", 0.5]] as const) {
-                const missing = needs[role].sol - rows[role].sol;
-                if (missing <= 0) continue;
-                const tx = new Transaction().add(
-                    SystemProgram.transfer({
-                        fromPubkey: launch.publicKey,
-                        toPubkey: pubs[role],
-                        lamports: Math.round(Math.min(amount, missing + 0.02) * LAMPORTS_PER_SOL),
-                    }),
-                );
-                const sig = await sendAndConfirmTransaction(conn, tx, [launch]);
-                console.log(`  → sent ${Math.min(amount, missing + 0.02)} SOL to ${role}: ${sig}`);
-            }
-            autoSent = true;
-            continue;
-        }
-
-        if (cluster === "devnet" && rows.launch.sol < needs.launch.sol &&
-            await confirm("  Request a devnet airdrop of 5 SOL to the launch wallet?", false)) {
+        if (cluster === "devnet" && await confirm("  Request a devnet airdrop of 5 SOL (to the calling wallet)?", false)) {
+            const target = calling ? calling.publicKey : pubs.launch;
             try {
-                await conn.requestAirdrop(pubs.launch, 5 * LAMPORTS_PER_SOL);
-                console.log("  → airdrop requested ( faucet-ratelimited at times — retry later if 0 )");
+                await conn.requestAirdrop(target, 5 * LAMPORTS_PER_SOL);
+                console.log("  → airdrop requested (faucet-ratelimited at times — retry later if 0)");
             } catch (e) {
                 console.log(`  airdrop failed: ${(e as Error).message}`);
             }
         }
-
         const again = await rl.question("\n  [ENTER] re-check  ·  [s] skip funding gate  ·  [q] quit > ");
         const a = again.trim().toLowerCase();
         if (a === "q") { console.log("state saved — rerun to resume."); process.exit(0); }
@@ -386,9 +417,12 @@ async function main() {
 
     const usdcToLp = Number(process.env.USDC_TO_LP || 2000);
     if (cluster === "mainnet-beta") {
+        const totalSol = (11 + 0.05 + 0.5 + 0.1).toFixed(2);
+        const totalUsdc = Math.ceil(usdcToLp * 1.18);
         console.log(`\n  ┌─ MAINNET, real money ────────────────────────────────────────────┐`);
-        console.log(`  │  launch wallet needs  ~${11} SOL + ${usdcToLp} USDC (USDC_TO_LP)`);
-        console.log(`  │  buy wallet needs     ~0.05 SOL + ${Math.ceil(usdcToLp * 0.18)} USDC`);
+        console.log(`  │  THE CALLING WALLET (solana CLI config) funds everything:       `);
+        console.log(`  │    ~${totalSol} SOL total (rents + fees + padding)`);
+        console.log(`  │    ${totalUsdc} USDC total (${usdcToLp} LP seed + ${Math.ceil(usdcToLp * 0.18)} dev buy)`);
         console.log(`  │  LP USDC is gone the moment fund-launch + the bundle land.      `);
         console.log(`  │  LP burn is PERMANENT (default-on).                             `);
         console.log(`  └──────────────────────────────────────────────────────────────────┘`);
@@ -562,6 +596,13 @@ async function main() {
   4. Stop any PC-side announcer/keeper tabs first.
 `);
     writeManifest(state, wallets);
+    if (state.mint && cluster === "mainnet-beta") {
+        console.log(`\n  Screener self-check (the trust trio should all read clean):`);
+        console.log(`    rugcheck:   https://rugcheck.xyz/tokens/${state.mint}`);
+        console.log(`    dexscreener: https://dexscreener.com/solana/${state.mint}`);
+        console.log(`    (mint revoked + metadata immutable + LP burned + freeze never set)`);
+        console.log(`    Jupiter express verification (1000 JUP) once volume justifies it.`);
+    }
     console.log(`\n  Wallet phrases: paper only. keys/*.json files: encrypted offline copy.`);
     console.log(`  Next (separate, deliberate — NOT automated here): rotate authorities`);
     console.log(`  to the Squads vault (set-keeper BEFORE amm — done), then the renounce`);
